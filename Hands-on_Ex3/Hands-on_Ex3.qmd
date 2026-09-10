@@ -16,34 +16,36 @@ editor: visual
 
 A spatio-temporal point process (also called space-time or spatial-temporal point process) is a random collection of points, where each point represents the time and location of an event. Examples of events include incidence of disease, sightings or births of a species, or the occurrences of fires, earthquakes, lightning strikes, tsunamis, or volcanic eruptions.
 
-The analysis of spatio-temporal point patterns is becoming increasingly necessary, given the rapid emergence of geographically and temporally indexed data in a wide range of fields. Several spatio-temporal point patterns analysis methods have been introduced and implemented in R in the last ten years. This chapter shows how various R packages can be combined to run a set of spatio-temporal point pattern analyses in a guided and intuitive way. A real world forest fire events in Kepulauan Bangka Belitung, Indonesia from 1st January 2023 to 31st December 2023 is used to illustrate the methods, procedures and interpretations.
+The analysis of spatio-temporal point patterns is becoming increasingly necessary, given the rapid emergence of geographically and temporally indexed data in a wide range of fields. Several spatio-temporal point patterns analysis methods have been introduced and implemented in R in the last ten years.
+
+This chapter shows how various R packages can be combined to run a set of spatio-temporal point pattern analyses in a guided and intuitive way. A real world forest fire events in Kepulauan Bangka Belitung, Indonesia from 1st January 2023 to 31st December 2023 is used to illustrate the methods, procedures and interpretations.
 
 ## Learning Outcome
 
 ### The research questions
 
-1. Are the locations of forest fire in Kepulauan Bangka Belitung spatial and spatio-temporally independent?
+1.  Are the locations of forest fire in Kepulauan Bangka Belitung spatial and spatio-temporally independent?
 
-2. If no,  where and when do the observed forest fire locations tend to cluster?
+2.  If no, where and when do the observed forest fire locations tend to cluster?
 
 ## The data
 
-For the purpose of this exercise, two data sets will be used. 
+For the purpose of this exercise, two data sets will be used.
 
-1. forestfires, a csv file provides locations of forest fire detected from the Moderate Resolution Imaging Spectroradiometer (MODIS) sensor data. The data is downloaded from Fire Information for Resource Management System. For the purpose of this exercise, only forest fires within Kepulauan Bangka Belitung will be used.
+1.  forestfires, a csv file provides locations of forest fire detected from the Moderate Resolution Imaging Spectroradiometer (MODIS) sensor data. The data is downloaded from Fire Information for Resource Management System. For the purpose of this exercise, only forest fires within Kepulauan Bangka Belitung will be used.
 
-2. Kepulauan_Bangka_Belitung, an ESRI shapefile showing the sub-district (i.e. kelurahan) boundary of Kepulauan Bangka Belitung. The data set was downloaded from Indonesia Geospatial portal. The original data covers the whole Indonesia. For the purpose of this exercise, only sub-districts within Kepulauan Bangka Belitung are extracted.
+2.  Kepulauan_Bangka_Belitung, an ESRI shapefile showing the sub-district (i.e. kelurahan) boundary of Kepulauan Bangka Belitung. The data set was downloaded from Indonesia Geospatial portal. The original data covers the whole Indonesia. For the purpose of this exercise, only sub-districts within Kepulauan Bangka Belitung are extracted.
 
 ## Install and Load Packages
 
 For the purpose of this study, six R packages will be used. They are:
 
-1. sf provides functions for importing processing and wrangling geospatial data.
-2. raster for handling raster data in R.
-3. spatstat for performing Spatial Point Patterns Analysis such as kcross, Lcross, et cetera.
-4. sparr provides functions to estimate fixed and adaptive kernel-smoothed spatial relative risk surfaces via the density-ratio method and perform subsequent inference. Fixed-bandwidth spatiotemporal density and relative risk estimation is also supported.
-5. tmap provides functions to produce cartographic quality thematic maps.
-6. tidyverse is a family of R packages that provides functions to perform common data science tasks including and not limited to data import, data transformation, data wrangling and data visualisation.
+1.  sf provides functions for importing processing and wrangling geospatial data.
+2.  raster for handling raster data in R.
+3.  spatstat for performing Spatial Point Patterns Analysis such as kcross, Lcross, et cetera.
+4.  sparr provides functions to estimate fixed and adaptive kernel-smoothed spatial relative risk surfaces via the density-ratio method and perform subsequent inference. Fixed-bandwidth spatiotemporal density and relative risk estimation is also supported.
+5.  tmap provides functions to produce cartographic quality thematic maps.
+6.  tidyverse is a family of R packages that provides functions to perform common data science tasks including and not limited to data import, data transformation, data wrangling and data visualisation.
 
 ```{r}
 pacman::p_load(sf, raster, spatstat, sparr, stpp, tmap, tidyverse)
@@ -54,22 +56,23 @@ pacman::p_load(sf, raster, spatstat, sparr, stpp, tmap, tidyverse)
 ### Import Study Area
 
 Import full set of data for Indonesia.
+
 ```{r}
 kbb_all <- st_read(dsn = "data/geospatial/iddata",
                layer = "Batas_Wilayah_KelurahanDesa_10K_AR")
 ```
+
 Check column names in the dataset.
 
 ```{r}
 names(kbb_all)
 ```
 
-Filter to Kepulauan Bangka Belitun and merge into a single shape. 
+Filter to Kepulauan Bangka Belitun and merge into a single shape.
 
-Note: Pulau Bangka comprises of 4 regencies and a city (Kota Pangkalpinang) and Pulau Belitung comprises of 2 regencies. 
+Note: Pulau Bangka comprises of 4 regencies and a city (Kota Pangkalpinang) and Pulau Belitung comprises of 2 regencies.
 
-Remove Z and M dimensions.
-Update to EPSG:32748 (WGS 84 / UTM zone 48S) which is the correct UTM projection for the Bangka Belitung region.
+Remove Z and M dimensions. Update to EPSG:32748 (WGS 84 / UTM zone 48S) which is the correct UTM projection for the Bangka Belitung region.
 
 ```{r}
 kbb_sf <- kbb_all %>%
@@ -92,6 +95,7 @@ Confirm if the converted output is in owin format.
 ```{r}
 class(kbb_owin)
 ```
+
 ### Import Forest Fire Data
 
 Convert the data into a spatial (point) object using WGS84 coordinates and reprojects it to EPSG:32748.
@@ -102,6 +106,7 @@ fire_sf <- read_csv("data/forestfires.csv") %>%
                        crs = 4326) %>%
   st_transform(crs = 32748)
 ```
+
 Because a ppp object only accepts numerical or character values as marks, convert the data type from acq_date to numeric.
 
 ```{r}
@@ -121,10 +126,9 @@ fire_kbb <- st_filter(fire_sf, kbb_sf)
 
 ## Visualizing the Fire Points
 
-### By Year 
+### By Year
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ## Plot
 
 ```{r}
@@ -144,16 +148,13 @@ tm_shape(kbb_sf)+
 tm_shape(fire_kbb) +
   tm_dots()
 ```
-
 :::
-
 
 Pulau Bangka is the larger island on the left and Pulau Belitung is the smaller island on the right. Fires are more concentrated on Pulau Bangka as compared to Pulau Belitung.
 
 ### By Month
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ## Plot
 
 ```{r}
@@ -179,12 +180,11 @@ tm_facets(by="Month_fac",
                     free.coords=FALSE,
                     drop.units = TRUE)
 ```
-
 :::
 
 ## Compute STKDE by Month
 
-This is done using  using [spattemp.density()](https://tilmandavies.github.io/sparr/reference/spattemp.density.html) of sparr package.
+This is done using using [spattemp.density()](https://tilmandavies.github.io/sparr/reference/spattemp.density.html) of sparr package.
 
 ### Extract Fire Forests by Month
 
@@ -201,6 +201,7 @@ Derive a ppp object called fire_month from fire_month sf data.frame.
 fire_month_ppp <- as.ppp(fire_month)
 fire_month_ppp
 ```
+
 Check that the output is in the correct class.
 
 ```{r}
@@ -220,6 +221,7 @@ Check how many duplicated points there are.
 ```{r}
 sum(duplicated(coords(fire_month_ppp)))
 ```
+
 Remove the duplicates.
 
 ```{r}
@@ -248,6 +250,7 @@ Use spattemp.density() of sparr package to compute the STKDE.
 st_kde <- spattemp.density(fire_month_owin)
 summary(st_kde)
 ```
+
 ### Plot The Spatio-temporal KDE Object
 
 plot() of R base is used to plot the KDE for July to December 2023.
@@ -310,6 +313,7 @@ One of the nice functions provided in sparr package is BOOT.spattemp(). It suppo
 set.seed(1234)
 BOOT.spattemp(fire_yday_owin) 
 ```
+
 ### Derive STKDE using h and lambda values
 
 ```{r}
@@ -336,7 +340,6 @@ Step 1: Extract forest fire coordinates from the fire point events.
 ```{r}
 coords <- st_coordinates(fire_kbb)
 ```
-
 
 Step 2: Create a data frame by combining the x- and y-coordinates and temporal event. Note that the temporal event must be in integer.
 
@@ -381,21 +384,16 @@ plotK() is used to visualise the output space-time inhomogeneous K-function.
 plotK(kbb_stik)
 ```
 
-
 ### Guide to interpret the plot
 
 If the contours show high values for small values of uu and vv, it suggests clustering at short spatial and temporal distances which means that events occur close to each other in both space and time.
 
 If the contours are flat or show low values, it indicates a more random distribution or a lack of significant clustering at those distances.
 
-The spatial and temporal extent of clustering can be understood by observing how rapidly the contours increase or decrease as we move along the axes. 
+The spatial and temporal extent of clustering can be understood by observing how rapidly the contours increase or decrease as we move along the axes.
 
 In the plot above, we can see clustering at specific distances by observing the spacing and values of the contour lines.
 
 ## Reference
 
 Peter Hall (1990) “Using the Bootstrap to Estimate Mean Squared Error and Select Smoothing Parameter in Nonparametric Problems”, JOURNAL OF MULTIVARIATE ANALYSIS, Vol. 32, pp. 177-203.
-
-
-
-
