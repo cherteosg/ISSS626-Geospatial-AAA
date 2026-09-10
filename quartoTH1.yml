@@ -1,0 +1,44 @@
+project:
+  type: website
+  output-dir: docs
+  
+website:
+  title: "ISSS608-VAA"
+  navbar:
+    left:
+    - text: "Hands-on Exercise"
+      menu:
+        - text: "Hands-on Exercise 1" 
+          href: "Hands-on_Ex01/Hands-on_Ex01.html"
+        - text: "Hands-on Exercise 2" 
+          href: "Hands-on_Ex02/Hands-on_Ex02.html" 
+        - text: "Hands-on Exercise 3" 
+          href: "Hands-on_Ex03/Hands-on_Ex03.html"
+        - text: "Hands-on Exercise 4" 
+          href: "Hands-on_Ex04/Hands-on_Ex04.html"
+        - text: "Hands-on Exercise 5" 
+          href: "Hands-on_Ex05/Hands-on_Ex05.html"
+        - text: "Hands-on Exercise 5a" 
+          href: "Hands-on_Ex05a/Hands-on_Ex05a.html"
+        - text: "Hands-on Exercise 5b" 
+          href: "Hands-on_Ex05b/Hands-on_Ex05b.html"
+        - text: "Hands-on Exercise 5c" 
+          href: "Hands-on_Ex05c/Hands-on_Ex05c.html"
+
+
+
+    right:
+      - href: index.qmd
+        text: Home
+      - about.qmd
+
+format:
+  html:
+    theme:
+      - sandstone
+      - brand
+    css: styles.css
+    toc: true
+
+editor: visual
+

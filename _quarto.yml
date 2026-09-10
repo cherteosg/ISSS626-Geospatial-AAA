@@ -1,0 +1,36 @@
+project:
+  type: website
+  output-dir: .
+  
+website:
+  title: "ISSS626 Geospatial Analytics and Applications"
+  navbar:
+    left:
+    - text: "Hands-on Exercise"
+      menu:
+        - text: "Exercise 1a" 
+          href: "Hands-on_Ex1a/Hands-on_Ex1a.html"
+        - text: "Exercise 1b" 
+          href: "Hands-on_Ex1b/Hands-on_Ex1b.html"
+        - text: "Exercise 2a" 
+          href: "Hands-on_Ex2a/Hands-on_Ex2a.html"
+        - text: "Exercise 2b" 
+          href: "Hands-on_Ex2b/Hands-on_Ex2b.html"
+        - text: "Exercise 3" 
+          href: "Hands-on_3/Hands-on_Ex3.html"
+        
+    right:
+      - href: index.qmd
+        text: Home
+      - about.qmd
+
+format:
+  html:
+    theme:
+      - sandstone
+      - brand
+    css: styles.css
+    toc: true
+
+editor: visual
+
