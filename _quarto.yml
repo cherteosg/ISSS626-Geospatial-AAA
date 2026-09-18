@@ -6,7 +6,7 @@ website:
   title: "ISSS626 Geospatial Analytics and Applications"
   navbar:
     left:
-    - text: "Hands-on Exercise"
+    - text: "Hands-on Exercises"
       menu:
         - text: "Exercise 1a" 
           href: "Hands-on_Ex1a/Hands-on_Ex1a.html"
