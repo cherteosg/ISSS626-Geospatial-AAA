@@ -1,0 +1,168 @@
+---
+title: "In-class Exercise Week 4"
+author: "Cher In Teo"
+format: html
+date: "September 18, 2026"
+date-modified: today
+execute:
+  echo: true
+  eval: true
+  warning: false
+  freeze: true
+  message: false
+---
+
+## Load Packages
+
+```{r}
+pacman::p_load(sf, ggstatplot, spdep, tmap, tidyverse, knitr, GWmodel)
+```
+
+## Data Import & Management
+
+Import Hunan shapefile & CSV file
+
+```{r}
+hunan <- st_read(dsn = "data/geospatial", 
+                 layer = "Hunan")
+```
+
+```{r}
+hunan2012 <- read_csv("data/aspatial/Hunan_2012.csv")
+```
+
+Join both and tidy the data table and filter columns using representative numbers instead of typing the column names to reduce typos
+
+```{r}
+hunan_sf <- left_join(hunan,hunan2012) %>%
+  select(1:3, 7, 15, 16, 31, 32)
+```
+
+## Map GDPPC
+
+Trial and error to adjust the dimensions.
+
+Code hidden:
+
+```{r}
+#| fig-width: 16
+#| fig-height: 6
+#| echo: false
+basemap <- tm_shape(hunan_sf) +
+  tm_polygons() +
+  tm_text("NAME_3", size=0.5)
+
+gdppc <- qtm(hunan_sf, "GDPPC") +
+  tm_layout(
+    legend.position = c("left", "bottom"))
+tmap_arrange(basemap, gdppc, asp=1, ncol=2)
+```
+
+Code shown:
+
+:::{style="font-size: 1.50em}
+```{r}
+#| fig-width: 16
+#| fig-height: 6
+#| eval: false
+basemap <- tm_shape(hunan_sf) +
+  tm_polygons() +
+  tm_text("NAME_3", size=0.5)
+
+gdppc <- qtm(hunan_sf, "GDPPC") +
+  tm_layout(
+    legend.position = c("left", "bottom"))
+tmap_arrange(basemap, gdppc, asp=1, ncol=2)
+```
+
+## Convert to SpatialPolygonDataFrame
+
+```{r}
+hunan_sp <- hunan_sf %>%
+  as_Spatial()
+```
+
+## Geographically Weighted Summary Statistic (GSWW) with adaptive bandwidth
+
+Determine adaptive bandwidth
+
+```{r}
+bw_CV <- bw.gwr(GDPPC ~1,
+                data = hunan_sp,
+                approach = "CV",
+                adaptive = TRUE,
+                kernel = "bisquare",
+                longlat = T)
+```
+
+```{r}
+bw_CV
+```
+
+```{r}
+bw_AIC <- bw.gwr(GDPPC ~1,
+                data = hunan_sp,
+                approach = "AICc",
+                adaptive = TRUE,
+                kernel = "bisquare",
+                longlat = T)
+```
+
+```{r}
+bw_AIC
+```
+
+Computing Geographically Weighted Summary Statistics
+
+The code chunk below computes gwss (GWmodel package). 
+
+The analysis is performed using adaptive distance weighted.
+
+The distance is derived using AICc method and the kernal method used is bisquare.
+
+```{r}
+gwstat <- gwss(data = hunan_sp,
+               vars = "GDPPC",
+               bw = bw_AIC,
+               kernel = "bisquare",
+               quantile = TRUE,
+               adaptive = TRUE,
+               longlat = T)
+```
+
+Note: gwss supports 5 kernel methods - gaussian, exponential, bisquare, tricute and boxcar. Try the rest.
+
+## Prepare Output Data'
+
+This only works if no sorting has been applied prior. This method cannot be used if data has been sorted before.
+
+```{r}
+gwstat_df <- as.data.frame(gwstat$SDF)
+```
+
+Next, cbind() is used to append the newly derived data.frame onto hunan_sf sf data.frame.
+
+```{r}
+hunan_gstat <- cbind(hunan_sf, gwstat_df)
+```
+
+## Visualising Geographically Weighted Summary Statistics
+
+```{r}
+tm_shape(hunan_gstat) +
+  tm_polygons(fill = "GDPPC_LM",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5,
+                values = "brewer.blues"),
+                fill.legend = tm_legend(
+                  title = "local Mean")) +
+  tm_borders(fill_alpha = 0.5) +
+  tm_title ("Distribution of Geographically Weighted Mean") +
+  tm_layout(legend.position = c("left","bottom"))
+```
+
+
+              )
+  
+
