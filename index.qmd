@@ -1,5 +1,5 @@
 ---
-title: "ISSS626: Geospatial Analytics And Applications"
+title: "ISSS626 : Geospatial Analytics And Applications"
 ---
 
 ```{r,echo=FALSE, warning=FALSE, message=FALSE}

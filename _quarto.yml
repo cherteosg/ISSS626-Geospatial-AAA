@@ -3,7 +3,7 @@ project:
   output-dir: .
   
 website:
-  title: "ISSS626 Geospatial Analytics and Applications"
+  title: "ISSS626 : Geospatial Analytics and Applications"
   navbar:
     left:
     - text: "Hands-on Exercises"
