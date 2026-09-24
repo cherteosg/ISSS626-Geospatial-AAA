@@ -76,7 +76,7 @@ hunan <- st_read(dsn = "data/geospatial",
 The raw data is in WGS 84 geographic coordinates system. For geospatial analysis, it is appropriate to use projected coordinates system. In the code chunk above, st_transform() is used to transform Hunan geospatial data from WGS 84 to UTM zone 50N (i.e. EPSG: 32650).
 :::
 
-### **Import Csv**
+### **Import .csv**
 
 Next, we will import Hunan_2012.csv into R by using read_csv() of **readr** package. The output is R data frame class.
 
@@ -185,7 +185,7 @@ Next, we need to assign weights to each neighboring polygon. In our case, each n
 ::: {.callout-note title="**What can we learn from the code chunk above?**"}
 - The input of nb2listw() must be an object of class **nb**. The syntax of the function has two major arguments, namely style and zero.poly.
 - *style* can take values “W”, “B”, “C”, “U”, “minmax” and “S”. B is the basic binary coding, W is row standardised (sums over all links to n), C is globally standardised (sums over all links to n), U is equal to C divided by the number of neighbours (sums over all links to unity), while S is the variance-stabilizing coding scheme proposed by Tiefelsdorf et al. 1999, p. 167-168 (sums over all links to n).
-- If *zero policy* is set to TRUE, weights vectors of zero length are inserted for regions without neighbour in the neighbours list. These will in turn generate lag values of zero, equivalent to the sum of products of the zero row t(rep(0, length=length(neighbours))) %*% x, for arbitrary numerical vector x of length length(neighbours). The spatially lagged value of x for the zero-neighbour region will then be zero, which may (or may not) be a sensible choice.
+- If *zero policy* is set to TRUE, weights vectors of zero length are inserted for regions without neighbour in the neighbours list. These will in turn generate lag values of zero, equivalent to the sum of products of the zero row t(rep(0, length=length(neighbours))) %\*% x, for arbitrary numerical vector x of length length(neighbours). The spatially lagged value of x for the zero-neighbour region will then be zero, which may (or may not) be a sensible choice.
 :::
 
 ### **Computing Local Moran’s I**
@@ -424,7 +424,7 @@ lisa <- lisa %>%
 ```
 
 ::: callout-note
-Notice that a new class called Insignificant has been added for records whereby p_ii > 0.05.
+Notice that a new class called Insignificant has been added for records whereby p_ii \> 0.05.
 :::
 
 Now, we can plot the LISA map by using the code chunk below.
@@ -455,9 +455,49 @@ For effective interpretation, it is better to plot both the local Moran’s I va
 
 The code chunk below will be used to create such visualisation.
 
-**We can also include the local Moran’s I map and p-value map as shown below for easy comparison.**
+We can also include the local Moran’s I map and p-value map as shown below for easy comparison.
 
-**Question: What statistical observations can you draw from the LISA map above?**
+```{r}
+ii.map <- tm_shape(lisa) +
+  tm_polygons(fill = "ii",
+              fill.scale = tm_scale_intervals(
+                style = "pretty",
+                n = 5,
+                values = "brewer.RdBu"),
+              fill.legend = tm_legend(
+                title = "Local Moran's I",
+                position = tm_pos_in(
+                  "left", "bottom"))) + 
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("Loal Moran's I of GDPPC (Queen's method)")
+
+lisa_map <- tm_shape(lisa) + 
+  tm_polygons( 
+    fill = "LISA_cluster", 
+    fill.scale = tm_scale_categorical( 
+      values = c( 
+        "grey80", # Insignificant 
+        "blue", # Low-Low 
+        "lightblue", # Low-High 
+        "pink", # High-Low 
+        "red" # High-High 
+    ) 
+  ), 
+  fill.legend = tm_legend( 
+    title = "LISA Cluster", 
+    position = tm_pos_in("left", "bottom")) 
+  ) + 
+  tm_borders() + 
+  tm_title("Local Moran's I Clusters (p < 0.05)") 
+lisa_map
+```
+
+::: {.callout-tip title="❓ Question"}
+What statistical observations can you draw from the LISA map above?
+:::
+
+**Answer**
+The LISA maps show that spatial autocorrelation in GDP per capita is localised. Statistically significant (p < 0.05) High-High clusters are found in the northeastern part of Hunan, indicating counties with high GDP per capita surrounded by similarly high-value neighbours. A significant Low-Low cluster appears in the southwestern part of the province, indicating low-GDP counties surrounded by other low-GDP counties. A few Low-High outliers occur next to the northeastern cluster, while no High-Low outliers are found. Most counties are not statistically significant, so the global clustering is driven mainly by these few local clusters.
 
 ## Hot Spots and Cold Spots Analysis (HCSA)
 
@@ -469,18 +509,18 @@ The term hot spots refer to areas where high values are concentrated and surroun
 
 On the other hands, the term cold spots refer to areas where low values are concentrated and surrounded by other low values. An example could be clusters of low GDP per capita, indicating areas where GDP per capita is consistently low.
 
-HCSA uses statistical methods, like the Getis-Ord Gi* statistic, to determine if the observed clustering is statistically significant or could have occurred randomly.
+HCSA uses statistical methods, like the Getis-Ord Gi\* statistic, to determine if the observed clustering is statistically significant or could have occurred randomly.
 
 The analysis consists of four steps:
 
 - Deriving spatial weight matrix
-- Computing Gi* statistics
-- Mapping Gi* statistics
+- Computing Gi\* statistics
+- Mapping Gi\* statistics
 - Communicating the analysis results
 
-### *10.5.1 **Deriving Distance Weight Matrix**
+### \*10.5.1 **Deriving Distance Weight Matrix**
 
-Whist the spatial autocorrelation considered units which shared borders, for Getis-Ord Gi* statistics, we are defining neighbours based on distance.
+Whist the spatial autocorrelation considered units which shared borders, for Getis-Ord Gi\* statistics, we are defining neighbours based on distance.
 
 There are two type of distance-based proximity matrix, they are:
 
@@ -488,7 +528,7 @@ There are two type of distance-based proximity matrix, they are:
 - adaptive distance weight matrix, and
 - inverse distance weights.
 
-### *10.5.1.1 **Computing Fixed Distance Weights**
+### \*10.5.1.1 **Computing Fixed Distance Weights**
 
 In this section, you will learn how to compute fixed distance weight matrix by using st_dist_band() and st_weights() of sfdep package.
 
@@ -515,7 +555,7 @@ hunan_fdw <- hunan %>%
 ```
 
 ::: callout-note
-Note that for Gi* include_self() must be used to endure that .
+Note that for Gi\* include_self() must be used to endure that .
 :::
 
 ### **Computing Adaptive Distance Weights**
@@ -539,11 +579,11 @@ hunan_adw <- hunan %>%
 
 ### **Computing Adaptive Distance Weights**
 
-### Computing Local Gi*
+### Computing Local Gi\*
 
-Local Gi* (pronounced “G-i-star”) is a Getis-Ord statistic used in spatial analysis to identify statistically significant hot spots and cold spots of high or low attribute values within a dataset. It measures the spatial clustering of values by comparing the total value within a specified neighborhood to the global total, producing a Z-score and p-value for each location to determine the likelihood that the observed pattern is not due to random chance.
+Local Gi\* (pronounced “G-i-star”) is a Getis-Ord statistic used in spatial analysis to identify statistically significant hot spots and cold spots of high or low attribute values within a dataset. It measures the spatial clustering of values by comparing the total value within a specified neighborhood to the global total, producing a Z-score and p-value for each location to determine the likelihood that the observed pattern is not due to random chance.
 
-In this sub-section, you will gain hands-on experience on performing Gi* analysis by using local_gstar_perm() of sfdep package.
+In this sub-section, you will gain hands-on experience on performing Gi\* analysis by using local_gstar_perm() of sfdep package.
 
 ```{r}
 HCSA_fdw <- hunan_fdw %>% 
@@ -556,9 +596,9 @@ HCSA_fdw <- hunan_fdw %>%
 
 ### **Preparing and Visualising HCSA Map**
 
-### Mapping Gi* with Fixed Distance Weights
+### Mapping Gi\* with Fixed Distance Weights
 
-In the code chunk below, thematic mapping functions of tmaps are used to prepare a choropleth map showing the distribution of Gi* values.
+In the code chunk below, thematic mapping functions of tmaps are used to prepare a choropleth map showing the distribution of Gi\* values.
 
 ```{r}
 tm_shape(HCSA_fdw) + 
@@ -574,11 +614,11 @@ tm_shape(HCSA_fdw) +
   tm_title("Gi* of GDPPC (Fixed Bandwidth d = 60799.91m)")
 ```
 
-### Mapping Local Gi* p-values
+### Mapping Local Gi\* p-values
 
 The choropleth shows there is evidence for both positive and negative Ii values. However, it is useful to consider the p-values for each of these values, as consider above.
 
-The code chunk below plots a choropleth map of p-values of Gi* by using functions of **tmap** package.
+The code chunk below plots a choropleth map of p-values of Gi\* by using functions of **tmap** package.
 
 ```{r}
 tm_shape(HCSA_fdw) + 
@@ -593,9 +633,9 @@ tm_shape(HCSA_fdw) +
   tm_title("p-values of local Gi* of GDPPC (Fixed distance)")
 ```
 
-### Mapping both Gi* values and p-values
+### Mapping both Gi\* values and p-values
 
-For effective interpretation, it is better to plot both the Gi* values map and its corresponding p-values map next to each other.
+For effective interpretation, it is better to plot both the Gi\* values map and its corresponding p-values map next to each other.
 
 The code chunk below will be used to create such visualisation.
 
@@ -648,7 +688,7 @@ HCSA_fdw <- HCSA_fdw %>%
 ```
 
 ::: callout-note
-Notice that a new class called Insignificant has been added for records whereby p_sim > 0.05.
+Notice that a new class called Insignificant has been added for records whereby p_sim \> 0.05.
 :::
 
 Now, we can plot the HCSA map by using the code chunk below.
@@ -673,7 +713,7 @@ HCSA_map <- tm_shape(HCSA_fdw) +
 HCSA_map
 ```
 
-For effective interpretation, it is better to plot both the local Gi* values map and its corresponding HCSA map next to each other.
+For effective interpretation, it is better to plot both the local Gi\* values map and its corresponding HCSA map next to each other.
 
 The code chunk below will be used to create such visualisation.
 
