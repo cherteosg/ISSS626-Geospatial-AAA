@@ -489,7 +489,10 @@ lisa_map <- tm_shape(lisa) +
   ) + 
   tm_borders() + 
   tm_title("Local Moran's I Clusters (p < 0.05)") 
-lisa_map
+
+tmap_arrange(ii.map, p_ii.map, asp=1, ncol=2)
+```
+
 
 tmap_arrange(ii.map, lisa_map, ncol = 2)
 ```
