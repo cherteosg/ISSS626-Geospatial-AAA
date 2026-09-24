@@ -466,9 +466,10 @@ ii.map <- tm_shape(lisa) +
                 values = "brewer.RdBu"), 
               fill.legend = tm_legend( 
                 title = "Local Moran's I", 
-                position = tm_pos_out())) + 
+                position = tm_pos_in( 
+                  "left", "bottom"))) + 
   tm_borders(fill_alpha = 0.5) + 
-  tm_title("Local Morans'I of GDPPC (Queen's method)")
+  tm_title("Local Moran's I of GDPPC (Queen's method)")
 
 lisa_map <- tm_shape(lisa) + 
   tm_polygons( 
@@ -519,7 +520,7 @@ The analysis consists of four steps:
 - Mapping Gi* statistics
 - Communicating the analysis results
 
-### *10.5.1 **Deriving Distance Weight Matrix**
+### **Deriving Distance Weight Matrix**
 
 Whist the spatial autocorrelation considered units which shared borders, for Getis-Ord Gi* statistics, we are defining neighbours based on distance.
 
@@ -529,7 +530,7 @@ There are two type of distance-based proximity matrix, they are:
 - adaptive distance weight matrix, and
 - inverse distance weights.
 
-### *10.5.1.1 **Computing Fixed Distance Weights**
+### **Computing Fixed Distance Weights**
 
 In this section, you will learn how to compute fixed distance weight matrix by using st_dist_band() and st_weights() of sfdep package.
 
