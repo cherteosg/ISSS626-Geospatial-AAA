@@ -493,15 +493,12 @@ lisa_map <- tm_shape(lisa) +
 tmap_arrange(ii.map, p_ii.map, asp=1, ncol=2)
 ```
 
-
-tmap_arrange(ii.map, lisa_map, ncol = 2)
-```
-
 ::: {.callout-tip title="❓ Question"}
 What statistical observations can you draw from the LISA map above?
 :::
 
 **Answer**
+
 The LISA maps show that spatial autocorrelation in GDP per capita is localised. Statistically significant (p < 0.05) High-High clusters are found in the northeastern part of Hunan, indicating counties with high GDP per capita surrounded by similarly high-value neighbours. A significant Low-Low cluster appears in the southwestern part of the province, indicating low-GDP counties surrounded by other low-GDP counties. A few Low-High outliers occur next to the northeastern cluster, while no High-Low outliers are found. Most counties are not statistically significant, so the global clustering is driven mainly by these few local clusters.
 
 ## Hot Spots and Cold Spots Analysis (HCSA)

@@ -240,6 +240,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#plotting-moran-scatterplot-with-standardised-variable" id="toc-plotting-moran-scatterplot-with-standardised-variable" class="nav-link" data-scroll-target="#plotting-moran-scatterplot-with-standardised-variable"><strong>Plotting Moran Scatterplot with Standardised Variable</strong></a></li>
   <li><a href="#preparing-lisa-map-classes" id="toc-preparing-lisa-map-classes" class="nav-link" data-scroll-target="#preparing-lisa-map-classes"><strong>Preparing LISA Map Classes</strong></a></li>
   <li><a href="#plotting-and-visualising-lisa-map" id="toc-plotting-and-visualising-lisa-map" class="nav-link" data-scroll-target="#plotting-and-visualising-lisa-map"><strong>Plotting and Visualising LISA map</strong></a></li>
+  </ul></li>
+  <li><a href="#hot-spots-and-cold-spots-analysis-hcsa" id="toc-hot-spots-and-cold-spots-analysis-hcsa" class="nav-link" data-scroll-target="#hot-spots-and-cold-spots-analysis-hcsa">Hot Spots and Cold Spots Analysis (HCSA)</a>
+  <ul class="collapse">
+  <li><a href="#deriving-distance-weight-matrix" id="toc-deriving-distance-weight-matrix" class="nav-link" data-scroll-target="#deriving-distance-weight-matrix"><strong>Deriving Distance Weight Matrix</strong></a></li>
+  <li><a href="#computing-fixed-distance-weights" id="toc-computing-fixed-distance-weights" class="nav-link" data-scroll-target="#computing-fixed-distance-weights"><strong>Computing Fixed Distance Weights</strong></a></li>
   <li><a href="#computing-adaptive-distance-weights" id="toc-computing-adaptive-distance-weights" class="nav-link" data-scroll-target="#computing-adaptive-distance-weights"><strong>Computing Adaptive Distance Weights</strong></a></li>
   <li><a href="#computing-adaptive-distance-weights-1" id="toc-computing-adaptive-distance-weights-1" class="nav-link" data-scroll-target="#computing-adaptive-distance-weights-1"><strong>Computing Adaptive Distance Weights</strong></a></li>
   <li><a href="#computing-local-gi" id="toc-computing-local-gi" class="nav-link" data-scroll-target="#computing-local-gi">Computing Local Gi*</a></li>
@@ -899,60 +904,58 @@ Note
 </div>
 </div>
 </div>
-<p>tmap_arrange(ii.map, lisa_map, ncol = 2)</p>
-<pre><code>
-::: {.callout-tip title="❓ Question"}
-What statistical observations can you draw from the LISA map above?
-:::
-
-**Answer**
-The LISA maps show that spatial autocorrelation in GDP per capita is localised. Statistically significant (p &lt; 0.05) High-High clusters are found in the northeastern part of Hunan, indicating counties with high GDP per capita surrounded by similarly high-value neighbours. A significant Low-Low cluster appears in the southwestern part of the province, indicating low-GDP counties surrounded by other low-GDP counties. A few Low-High outliers occur next to the northeastern cluster, while no High-Low outliers are found. Most counties are not statistically significant, so the global clustering is driven mainly by these few local clusters.
-
-## Hot Spots and Cold Spots Analysis (HCSA)
-
-Hot spots and cold spots analysis is a technique used in spatial statistics to identify statistically significant clusters of high values (hot spots) and low values (cold spots) of a geographically referenced attribute (i.e. GDPPC). These analyses help visualize and understand spatial patterns, revealing areas where data points are clustered more densely than would be expected by random chance.
-
-Figure below shows the hot spots and cold spots of GDP per capita of Hunan Province, People's Republic of China.
-
-The term hot spots refer to areas where high values are concentrated and surrounded by other high values. It has been used generically across disciplines to describe a region or value that is higher relative to its surroundings (Lepers et al 2005, Aben et al 2012, Isobe et al 2015). For example, a hot spot analysis might reveal clusters of high GDP per capita in a province, indicating areas with significantly higher GDP per capita than other parts of the province.
-
-On the other hands, the term cold spots refer to areas where low values are concentrated and surrounded by other low values. An example could be clusters of low GDP per capita, indicating areas where GDP per capita is consistently low.
-
-HCSA uses statistical methods, like the Getis-Ord Gi* statistic, to determine if the observed clustering is statistically significant or could have occurred randomly.
-
-The analysis consists of four steps:
-
-- Deriving spatial weight matrix
-- Computing Gi* statistics
-- Mapping Gi* statistics
-- Communicating the analysis results
-
-### **Deriving Distance Weight Matrix**
-
-Whist the spatial autocorrelation considered units which shared borders, for Getis-Ord Gi* statistics, we are defining neighbours based on distance.
-
-There are two type of distance-based proximity matrix, they are:
-
-- fixed distance weight matrix,
-- adaptive distance weight matrix, and
-- inverse distance weights.
-
-### **Computing Fixed Distance Weights**
-
-In this section, you will learn how to compute fixed distance weight matrix by using st_dist_band() and st_weights() of sfdep package.
-
-Firstly, we need to determine the upper limit for distance band by using the steps below:
-
-
-::: {.cell}
-
-```{.r .cell-code}
-ct &lt;- critical_threshold(st_geometry(hunan)) 
-ct</code></pre>
+<div class="callout callout-style-default callout-tip callout-titled" title="❓ Question">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>❓ Question
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>What statistical observations can you draw from the LISA map above?</p>
+</div>
+</div>
+<p><strong>Answer</strong></p>
+<p>The LISA maps show that spatial autocorrelation in GDP per capita is localised. Statistically significant (p &lt; 0.05) High-High clusters are found in the northeastern part of Hunan, indicating counties with high GDP per capita surrounded by similarly high-value neighbours. A significant Low-Low cluster appears in the southwestern part of the province, indicating low-GDP counties surrounded by other low-GDP counties. A few Low-High outliers occur next to the northeastern cluster, while no High-Low outliers are found. Most counties are not statistically significant, so the global clustering is driven mainly by these few local clusters.</p>
+</section>
+</section>
+<section id="hot-spots-and-cold-spots-analysis-hcsa" class="level2">
+<h2 class="anchored" data-anchor-id="hot-spots-and-cold-spots-analysis-hcsa">Hot Spots and Cold Spots Analysis (HCSA)</h2>
+<p>Hot spots and cold spots analysis is a technique used in spatial statistics to identify statistically significant clusters of high values (hot spots) and low values (cold spots) of a geographically referenced attribute (i.e.&nbsp;GDPPC). These analyses help visualize and understand spatial patterns, revealing areas where data points are clustered more densely than would be expected by random chance.</p>
+<p>Figure below shows the hot spots and cold spots of GDP per capita of Hunan Province, People’s Republic of China.</p>
+<p>The term hot spots refer to areas where high values are concentrated and surrounded by other high values. It has been used generically across disciplines to describe a region or value that is higher relative to its surroundings (Lepers et al 2005, Aben et al 2012, Isobe et al 2015). For example, a hot spot analysis might reveal clusters of high GDP per capita in a province, indicating areas with significantly higher GDP per capita than other parts of the province.</p>
+<p>On the other hands, the term cold spots refer to areas where low values are concentrated and surrounded by other low values. An example could be clusters of low GDP per capita, indicating areas where GDP per capita is consistently low.</p>
+<p>HCSA uses statistical methods, like the Getis-Ord Gi* statistic, to determine if the observed clustering is statistically significant or could have occurred randomly.</p>
+<p>The analysis consists of four steps:</p>
+<ul>
+<li>Deriving spatial weight matrix</li>
+<li>Computing Gi* statistics</li>
+<li>Mapping Gi* statistics</li>
+<li>Communicating the analysis results</li>
+</ul>
+<section id="deriving-distance-weight-matrix" class="level3">
+<h3 class="anchored" data-anchor-id="deriving-distance-weight-matrix"><strong>Deriving Distance Weight Matrix</strong></h3>
+<p>Whist the spatial autocorrelation considered units which shared borders, for Getis-Ord Gi* statistics, we are defining neighbours based on distance.</p>
+<p>There are two type of distance-based proximity matrix, they are:</p>
+<ul>
+<li>fixed distance weight matrix,</li>
+<li>adaptive distance weight matrix, and</li>
+<li>inverse distance weights.</li>
+</ul>
+</section>
+<section id="computing-fixed-distance-weights" class="level3">
+<h3 class="anchored" data-anchor-id="computing-fixed-distance-weights"><strong>Computing Fixed Distance Weights</strong></h3>
+<p>In this section, you will learn how to compute fixed distance weight matrix by using st_dist_band() and st_weights() of sfdep package.</p>
+<p>Firstly, we need to determine the upper limit for distance band by using the steps below:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>ct <span class="ot">&lt;-</span> <span class="fu">critical_threshold</span>(<span class="fu">st_geometry</span>(hunan)) </span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>ct</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 60799.91</code></pre>
 </div>
-<p>:::</p>
+</div>
 <p>The summary report shows that the largest first nearest neighbour distance is 60.80 km, so using this as the upper threshold gives certainty that all units will have at least one neighbour.</p>
 <p>Using the critical threshold value computed above, code chunk below is used to compute the fixed distance weight.</p>
 <div class="cell">
