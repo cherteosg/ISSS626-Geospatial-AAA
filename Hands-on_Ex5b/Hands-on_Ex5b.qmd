@@ -502,7 +502,7 @@ lisa_map <- tm_shape(lisa) +
   tm_title("Local Moran's I Clusters (p < 0.05)") 
 lisa_map
 
-tmap_arrange(equal, quantile, asp = 1, ncol = 2)
+tmap_arrange(ii.map, lisa_map, asp = 1, ncol = 2)
 ```
 
 ::: {.callout-tip title="❓ Question"}
