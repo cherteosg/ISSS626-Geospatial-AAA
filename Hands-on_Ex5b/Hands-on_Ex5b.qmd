@@ -235,7 +235,7 @@ tm_shape(lisa) +
                 title = "Local Moran's I", 
                 position = tm_pos_out())) + 
   tm_borders(fill_alpha = 0.5) + 
-  tm_title("Loal Morans'I of GDPPC (Queen's method)")
+  tm_title("Local Morans'I of GDPPC (Queen's method)")
 ```
 
 ### Mapping local Moran’s I p-values
@@ -458,6 +458,18 @@ The code chunk below will be used to create such visualisation.
 We can also include the local Moran’s I map and p-value map as shown below for easy comparison.
 
 ```{r}
+tm_shape(lisa) + 
+  tm_polygons(fill = "ii", 
+              fill.scale = tm_scale_intervals( 
+                style = "pretty", 
+                n = 5, 
+                values = "brewer.RdBu"), 
+              fill.legend = tm_legend( 
+                title = "Local Moran's I", 
+                position = tm_pos_out())) + 
+  tm_borders(fill_alpha = 0.5) + 
+  tm_title("Local Morans'I of GDPPC (Queen's method)")
+
 ii.map <- tm_shape(lisa) +
   tm_polygons(fill = "ii",
               fill.scale = tm_scale_intervals(
@@ -470,20 +482,25 @@ ii.map <- tm_shape(lisa) +
   tm_borders(col_alpha = 0.5) +
   tm_title("Local Moran's I of GDPPC (Queen's method)")
 
-lisa_map <- tm_shape(lisa) +
-  tm_polygons(
-    fill = "LISA_cluster",
-    fill.scale = tm_scale_categorical(
-      values = c("grey80",     # Insignificant
-                 "blue",       # Low-Low
-                 "lightblue",  # Low-High
-                 "pink",       # High-Low
-                 "red")),      # High-High
-    fill.legend = tm_legend(
-      title = "LISA Cluster",
-      position = tm_pos_in("left", "bottom"))) +
-  tm_borders() +
-  tm_title("Local Moran's I Clusters (p < 0.05)")
+lisa_map <- tm_shape(lisa) + 
+  tm_polygons( 
+    fill = "LISA_cluster", 
+    fill.scale = tm_scale_categorical( 
+      values = c( 
+        "grey80", # Insignificant 
+        "blue", # Low-Low 
+        "lightblue", # Low-High 
+        "pink", # High-Low 
+        "red" # High-High 
+    ) 
+  ), 
+  fill.legend = tm_legend( 
+    title = "LISA Cluster", 
+    position = tm_pos_in("left", "bottom")) 
+  ) + 
+  tm_borders() + 
+  tm_title("Local Moran's I Clusters (p < 0.05)") 
+lisa_map
 
 tmap_arrange(equal, quantile, asp = 1, ncol = 2)
 ```
