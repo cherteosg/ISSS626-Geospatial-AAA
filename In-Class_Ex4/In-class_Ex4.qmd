@@ -60,7 +60,8 @@ tmap_arrange(basemap, gdppc, asp=1, ncol=2)
 
 Code shown:
 
-:::{style="font-size: 1.50em}
+\:::{style="font-size: 1.50em}
+
 ```{r}
 #| fig-width: 16
 #| fig-height: 6
@@ -112,9 +113,10 @@ bw_AIC <- bw.gwr(GDPPC ~1,
 bw_AIC
 ```
 
-Computing Geographically Weighted Summary Statistics
+Computing Geographically Weighted Summary Statistics 
 
-The code chunk below computes gwss (GWmodel package). 
+
+The code chunk below computes gwss (GWmodel package).
 
 The analysis is performed using adaptive distance weighted.
 
@@ -162,7 +164,6 @@ tm_shape(hunan_gstat) +
   tm_layout(legend.position = c("left","bottom"))
 ```
 
-
-              )
-  
-
+```         
+          )
+```

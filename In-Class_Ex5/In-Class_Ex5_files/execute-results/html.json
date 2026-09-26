@@ -1,0 +1,17 @@
+{
+  "hash": "71c1102849fc96e6fc5f37426843e473",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"In Class Exercise 5\"\n---\n\n\n::: {.cell}\n\n```{.r .cell-code}\npacman::p_load(sf, sfdep, tmap, tidyverse)\n```\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nhunan <- st_read(dsn = \"data/geospatial\", \n                  layer = \"Hunan\")\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\nReading layer `Hunan' from data source \n  `C:\\Users\\chert\\Desktop\\cherteosg\\ISSS626-GSA\\In-Class_Ex5\\data\\geospatial' \n  using driver `ESRI Shapefile'\nSimple feature collection with 88 features and 7 fields\nGeometry type: POLYGON\nDimension:     XY\nBounding box:  xmin: 108.7831 ymin: 24.6342 xmax: 114.2544 ymax: 30.12812\nGeodetic CRS:  WGS 84\n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nhunan2012 <- read_csv(\"data/aspatial/Hunan_2012.csv\")\n```\n\n::: {.cell-output .cell-output-stderr}\n\n```\nRows: 88 Columns: 29\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \",\"\nchr  (2): County, City\ndbl (27): avg_wage, deposite, FAI, Gov_Rev, Gov_Exp, GDP, GDPPC, GIO, Loan, ...\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.\n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nhunan_GDPCC <- left_join(hunan, hunan2012) %>% \n  select(1:4, 7, 15, 16)\n```\n\n::: {.cell-output .cell-output-stderr}\n\n```\nJoining with `by = join_by(County)`\n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nwm_q <- hunan_GDPCC %>%\n    mutate( nb = \n        st_contiguity(geometry),\n            wt = st_weights(nb,\n                            style = \"W\"),\n          .before = 1)\n```\n:::\n\n\n## Create Global Moran I \n\n\n::: {.cell}\n\n```{.r .cell-code}\nmoranI <- global_moran (wm_q$GDPPC,\n                        wm_q$nb,\n                        wm_q$wt)\nglimpse(moranI)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\nList of 2\n $ I: num 0.301\n $ K: num 7.64\n```\n\n\n:::\n:::\n\n\n\n",
+    "supporting": [
+      "In-Class_Ex5_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

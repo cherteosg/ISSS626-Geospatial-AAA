@@ -1,0 +1,76 @@
+---
+title: "In Class Exercise 5"
+---
+
+```{r}
+pacman::p_load(sf, sfdep, tmap, tidyverse)
+```
+
+```{r}
+hunan <- st_read(dsn = "data/geospatial", 
+                  layer = "Hunan")
+```
+
+```{r}
+hunan2012 <- read_csv("data/aspatial/Hunan_2012.csv")
+```
+
+```{r}
+hunan_GDPCC <- left_join(hunan, hunan2012) %>% 
+  select(1:4, 7, 15, 16)
+```
+
+```{r}
+wm_q <- hunan_GDPCC %>%
+    mutate( nb = 
+        st_contiguity(geometry),
+            wt = st_weights(nb,
+                            style = "W"),
+          .before = 1)
+```
+
+Create Global Moran I 
+
+```{r}
+moranI <- global_moran (wm_q$GDPPC,
+                        wm_q$nb,
+                        wm_q$wt)
+glimpse(moranI)
+```
+```{r}
+set.seed(1234)
+
+global_moran_perm(wm_q$GDPPC,
+                   wm_q$nb,
+                   wm_q$wt,
+                   nsim = 99)
+```
+
+```{r}
+lisa <- wm_q %>%
+  mutate(local_moran = local_moran(
+    GDPPC, nb, wt, nsim = 99),
+          .before = 1) %>%
+  unnest(local_moran)
+```
+
+Plotting Lisa Map
+
+```{r}
+lisa_sig <- lisa %>%
+  filter(p_ii_sim < 0.05)
+tmap_mode("plot")
+tm_shape(lisa) +
+  tm_polygons() +
+  tm_borders(fill_alpha = 0.5) +
+tm_shape(lisa_sig) +
+  tm_polygons(fill = "Mean",
+              fill.legend = tm_legend(
+                text.size = 1,
+                width = 6)) +
+  tm_borders(fill_alpha = 0.4) +
+  tm_layout(legend.title.size =1.25)
+```
+
+
+
