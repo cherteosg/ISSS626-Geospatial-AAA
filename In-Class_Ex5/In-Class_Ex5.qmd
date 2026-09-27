@@ -29,7 +29,7 @@ wm_q <- hunan_GDPCC %>%
           .before = 1)
 ```
 
-Create Global Moran I 
+Create Global Moran I
 
 ```{r}
 moranI <- global_moran (wm_q$GDPPC,
@@ -37,6 +37,7 @@ moranI <- global_moran (wm_q$GDPPC,
                         wm_q$wt)
 glimpse(moranI)
 ```
+
 ```{r}
 set.seed(1234)
 
@@ -64,13 +65,10 @@ tm_shape(lisa) +
   tm_polygons() +
   tm_borders(fill_alpha = 0.5) +
 tm_shape(lisa_sig) +
-  tm_polygons(fill = "Mean",
+  tm_polygons(fill = "mean",
               fill.legend = tm_legend(
                 text.size = 1,
                 width = 6)) +
   tm_borders(fill_alpha = 0.4) +
   tm_layout(legend.title.size =1.25)
 ```
-
-
-

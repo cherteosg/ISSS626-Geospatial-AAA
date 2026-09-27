@@ -1,0 +1,805 @@
+---
+title: Geospatial Analytics For Road Safety
+format: html
+execute:
+  echo: true
+  eval: true
+  message: false
+  warning: false
+  freeze: true
+editor: visual
+---
+
+## 1. Introduction
+
+According to a [2019 World Health Organization report](https://www.who.int/docs/default-source/documents/the-power-of-cities/bangkok-case-study-final.pdf?sfvrsn=790ce747_2), Thailand has one of the 10 highest road traffic fatality rates in the world.
+
+Therefore, understanding the patterns in occurrences will help to augemnt government intervention policies to improve public safety and foster a safer, more sustainable urban transport ecosystem.
+
+## 2. Scope
+
+In this geospatial analysis study, we will look at the number of road traffic fatalities in the [Bangkok Metropolitan Region](https://en.wikipedia.org/wiki/Bangkok_Metropolitan_Region).
+
+The Bangkok Metrolitan Region (BMR) comprises of **Bangkok** (metropolis) and the following provinces:
+
+- Nakhon Pathom
+- Pathum Thani
+- Nonthaburi
+- Samut Prakan
+- Samut Sakhon
+
+## 3. Analytical Questions
+
+Through geospatial analysis, we seek to find answers for the questions below.
+
+1.  Where are the statistically significant hot spots for road fatalities?
+2.  Which group of road users are the most vulnerable?
+3.  Does proximity to hospitals reduce road accident fatality rates?
+4.  Do areas served by the BTS & MRT network have lower fatality rates?
+
+## 4. The Data
+
+### 4.1 Packages Used
+
+The following packages will be used in this study:
+
+- **sf** (spatial data handling)
+- **tmap** (mapping)
+- **tidyverse** (data wrangling)
+- **spatstat/sparr/stpp** (point pattern analysis)
+- **spNetwork** (network-based analysis)
+- **spdep/sfdep** (spatial statistics)
+- **terra** (raster data)
+- **knitr** (report formatting)
+
+Install packages using the following code:
+
+```{r}
+pacman::p_load(sf, tmap, tidyverse, rvest, terra, spatstat, sparr, stpp, spNetwork, spdep, knitr, sfdep)
+```
+
+### 4.2 Datasets
+
+These are the datasets which we will use for this study.
+
+1.  [Thailand Road Fatalities 2024](https://www.kaggle.com/datasets/pornsakkamchan/thailand-road-accident-fatalities-2024) from Kaggle.
+
+2.  [OpenStreetMap for Thailand](https://download.geofabrik.de/asia/thailand.html) which will provide the surface infrastructure data.
+
+3.  [Geoboundaries for Thailand](https://www.geoboundaries.org/countryDownloads.html). We will only need the below files:
+
+-ADM1 (Administrative Level 1) for Provinces. -ADM2 (Administrative Level 2) for Districts.
+
+### 4.3 Data Import
+
+Import the data using the following code:
+
+```{r}
+adm1  <- st_read("data/geospatial/ADM1.geojson")
+adm2  <- st_read("data/geospatial/ADM2.geojson")
+roads <- st_read("data/geospatial/Roads.geojson")
+```
+
+### 4.4 Define Bangkok Metropolitan Region (BMR)
+
+Check that Bangkok and the 5 provinces are listed and take note of the exact naming convention.
+
+```{r}
+print(adm1$shapeName)
+```
+
+Use the following code to filter to the required study area for BMR.
+
+```{r}
+bkk <- adm1 %>%
+  filter(shapeName %in% c("Bangkok", "Nonthaburi Province", "Pathum Thani Province", "Samut Prakan Province", "Samut Sakhon Province", "Nakhon Pathom Province"))
+```
+
+Check that the filtering is accurate. There should be 6 rows captured.
+
+```{r}
+nrow(bkk)  
+```
+
+Check that the shape of the BMR plot is in line with expectations.
+
+```{r}
+plot(st_geometry(bkk))   
+```
+
+Image of BMR (from Wikipedia) for comparison.
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE}
+include_graphics("images/BMR.png")
+```
+
+### 4.5 Districts Bangkok Metropolitan Region (BMR)
+
+Next, check the data in the ADM2 file.
+
+```{r}
+names(adm2)
+```
+
+Perform a sanity check on the data. The below will show the first 6 rows of the data.
+
+```{r}
+head(adm2)
+```
+
+::: {.callout-note title="**Note:**"}
+- The Geometry Type is Multipolygon (e.g. can consist of multiple disconnected polygons such as an island or enclave).
+- The Coordinate Reference System (CRS) is WGS 84 which uses degrees and need to be transformed to a projected CRS (in meters) to measure distance.
+:::
+
+Filter the data to BMR using the following code. Each polygon is converted to a representive point to improve plotting accuracy and avoid issue of overlapping boundaries between neighbouring polygons.
+
+```{r}
+adm2pt <- adm2
+
+st_geometry(adm2pt) <- st_geometry(st_point_on_surface(adm2))
+```
+
+Next, use a spatial join using 'shapeName' and use an inner join to only keep districts with representative points in the BMR.
+
+```{r}
+inside <- st_join(adm2pt, bkk["shapeName"], join = st_within, left = FALSE)
+```
+
+Use the below code to switch back from points to actual polygons for the BMR regions.
+
+```{r}
+bkkdist <- adm2 %>% filter(shapeID %in% inside$shapeID)
+```
+
+Perform a sanity check on the number of districts in BMR. There should be 79 for Bangkok and the 5 provinces in total.
+
+```{r}
+nrow(bkkdist)
+```
+
+### 4.6 Roads in Bangkok Metropolitan Region (BMR)
+
+Next, we move on to the surface infrastructure. We will check what is available in the data first before proceeding.
+
+```{r}
+names(roads)
+```
+
+We will now filter to roads within the BMR using the below code.
+
+```{r}
+bkkroad <- st_filter(roads, bkk)
+```
+
+Perform a sanity check. The shape should match that of the BMR boundary.
+
+```{r}
+plot(st_geometry(bkkroad), col = "steelblue", lwd = 0.3)  
+```
+
+We will now transform the spatial objects from WGS 84(EPSG:4326), which measures position in degrees, to EPSG:32647 which measures position in metres.UTM Zone 47N is the correct zone for BMR.
+
+```{r}
+bkk_t       <- st_transform(bkk, 32647)         
+bkkdist_t <- st_transform(bkkdist, 32647)
+bkkroad_t     <- st_transform(bkkroad, 32647)
+```
+
+### 4.7 Road Fatalities in BMR
+
+This dataset is in Thai language. For purpose of this study, it was translated into English language using an AI tool. Specific columns which had been translated were randomly validated as a sanity check and no issues were identified.
+
+First, import the data.
+
+```{r}
+bkkacc <- read_csv("data/aspatial/bkkdata_t.csv")
+```
+
+Perform a sanity check of the variables available.
+
+```{r}
+head(bkkacc)
+```
+
+From the above, it appears the values for latitude and longtitude has been swapped based on the range of values. Latitude should have smaller values and latitude much larger values.
+
+Rename the headings to resolve the issue.
+
+```{r}
+names(bkkacc)
+```
+
+```{r}
+bkkacc <- bkkacc %>%
+  rename(longtt = acc_lat, lattt = acc_long)
+```
+
+Check that the renaming has worked.
+
+```{r}
+names(bkkacc)
+```
+
+### 4.8 Data Wrangling
+
+#### 4.8.1 Remove rows with missing coordinates
+
+```{r}
+n_before <- nrow(bkkacc)
+
+bkkacc <- bkkacc %>% filter(!is.na(longtt), !is.na(lattt))
+
+n_after <- nrow(bkkacc)
+n_deleted <- n_before - n_after
+
+n_deleted
+```
+
+#### 4.8.2 Check for invalid coordinates (outside of range 597-106, 5-21)
+
+```{r}
+invalid_coords <- bkkacc %>%
+  
+filter(longtt < 97 | longtt > 106 | lattt < 5 | lattt > 21)
+
+nrow(invalid_coords)
+```
+#### 4.8.3 Check for duplicates
+
+```{r}
+bkkacc %>%
+  
+get_dupes(longtt, lattt, confirmed_death_date, age, sex, cause_code) %>% 
+  
+nrow()
+```
+```{r}
+
+bkkacc %>%
+  
+get_dupes(longtt, lattt, confirmed_death_date, age, sex, cause_code) %>%
+
+arrange(longtt, lattt, confirmed_death_date)
+```
+
+There are 16 duplicates identified. Upon detailed review, it looks like these are most likely erroneous entries (i.e. duplicated) and can be dropped from the data set.
+
+```{r}
+
+bkkacc_clean <- bkkacc %>%
+
+distinct(longtt, lattt, confirmed_death_date, age, sex, cause_code, .keep_all = TRUE)
+```
+
+
+#### 4.8.4 Conver to **sf** and Transform
+
+Convert the aspatial file to **sf**.
+
+```{r}
+bkkacc_sf <- st_as_sf(bkkacc, coords = c("longtt", "lattt"), crs = 4326)
+```
+
+Transform the spatial objects from WGS 84(EPSG:4326), which measures position in degrees, to EPSG:32647.
+
+```{r}
+bkkacc_t <- st_transform(bkkacc_sf, 32647)
+```
+
+#### 4.8.5 Filter to BMR
+
+```{r}
+bkkacc_g <- st_filter(bkkacc_t, bkk_t)
+```
+
+```{r}
+nrow(bkkacc_g)
+```
+
+```{r}
+names(bkkacc_g)
+```
+
+Perform a sanity check to confirm that the data preparation is in order.
+
+```{r}
+plot(st_geometry(bkk_t), border = "blue")
+plot(st_geometry(bkkacc_g), col = "black", pch = 16, cex = 0.3, add = TRUE)
+```
+
+#### 4.8.6 Convert Date
+
+Convert the values to a date format. 
+```{r}
+bkkacc_g <- bkkacc_g %>%
+  
+mutate(confirmed_death_date = dmy(confirmed_death_date))
+```
+
+Sanity check that conversion is in place.
+
+```{r}
+class(bkkacc_g$confirmed_death_date)  # before: "character", after: "Date
+```
+
+## 5. Spatial Statistics - Point Pattern Object
+
+Create an observation window (owin) and convert from **sf** to *ppp*.
+
+```{r}
+bkk_owin <- as.owin(st_geometry(bkk_t))
+
+bkkacc_ppp <- st_coordinates(bkkacc_g) %>%
+  as.ppp(W = bkk_owin) %>%
+  unique.ppp()
+```
+
+### 5.1 Duplicates
+
+Duplicates in this instance means that the fatalities occured at the same location but does not take into account other incident date.
+
+Review other pertinent information other than the coordinates for the duplicates.
+
+```{r}
+bkkacc_g %>%
+  st_drop_geometry() %>%
+  bind_cols(st_coordinates(bkkacc_g)) %>%
+  group_by(X, Y) %>%
+  filter(n() > 1) %>%
+  arrange(X, Y, confirmed_death_date) %>%
+  select(X, Y, confirmed_death_date, age, sex, cause_code)
+```
+
+As these duplicate-location events represent genuinely distinct fatalities,  random jittering is applied so that each contributes separately to the Kernel Density Estimation (KDE) surface instead of merging into a single point or creating a false density spike at the specific coordinate.
+
+```{r}
+bkkacc_ppp <- st_coordinates(bkkacc_g) %>%
+  as.ppp(W = bkk_owin) %>%
+  rjitter(radius = 0.0001, retry = TRUE, nsim = 1, drop = TRUE)
+
+kde_result <- density(bkkacc_ppp)
+```
+
+## 6. Question 1: Statistically Significant Hotspots
+
+### 6.1 Kernel Density Estimation
+
+```{r}
+kde_acc <- density(bkkacc_ppp, sigma = bw.diggle(bkkacc_ppp))
+
+plot(kde_acc, main = "Kernel Density of Fatal Accidents")
+```
+
+::: callout-note
+- There is a single dominant hotspot in the center of the BMR study area. 
+- The density decreases away from the center, with very low fatal accidents recorded in the peripheral areas.
+:::
+
+### 6.1.1 Bandwidth Sensitivity Check 
+
+A smaller bandwidth allows for a micro view of the hotspot but is more susceptible to 'noise.
+A larger bandwidth is useful for zonal visualisation but reduces granularity of information. 
+Adjusting the bandwidth controls the degree of smoothing (i.e. radius of influence) of each accident point and enables customization of the analysis to match the spatial scale required. 
+
+```{r}
+kde_500  <- density(bkkacc_ppp, sigma = 500)
+kde_1000 <- density(bkkacc_ppp, sigma = 1000)
+kde_2000 <- density(bkkacc_ppp, sigma = 2000)
+
+par(mfrow = c(1,3))
+plot(kde_500,  main = "sigma = 500m")
+plot(kde_1000, main = "sigma = 1000m")
+plot(kde_2000, main = "sigma = 2000m")
+par(mfrow = c(1,1))
+```
+Based on the output above, the medium bandwidth (sigma = 1000m) is best suited for this study, as it balances the excessive noise seen at sigma = 500m with the oversmoothing seen at sigma = 2000m.
+
+### 6.2 G-function vs Complete Spatial Randomness (CSR)
+
+KDE enables visualization of the concentration of accidents. Using the G-function to test the observed point pattern against a Complete Spatial Randomness (CSR) null model will determine whether that concentration is statistically greater than what would be expected by chance. 
+
+```{r}
+G_env <- envelope(bkkacc_ppp, Gest, nsim = 99, correction = "border")
+
+plot(G_env, main = "G-function vs CSR")
+```
+The G-function test confirms that fatal accidents in BMR are significantly clustered, not randomly distributed. 
+
+The observed G-function (black line) is consistently above the Complete Spatial Randomness (CSR) simulation envelope (grey area) across all tested distances. This indicates that accidents occur closer to one another than expected if left to chance and confirms that accidents are concentrated in specific zones rather than uniform occurrence under the theoretical CSR model (red line).
+
+### 6.3 District-Level Hot spots
+
+Now that spatial clustering has been confirmed at the individual point level, we will move on to district-level analysis.
+
+If there are more roads in a locale, the number of fatal accidents is naturally expected to be higher.
+
+To adjust for this exposure, we normalize accident counts by road length within each district, then use Moran's I to test whether these rates are likewise spatially clustered.
+
+#### 6.3.1 Accident count per district
+
+```{r}
+acc_join <- st_join(bkkacc_g, bkkdist_t)
+
+acc_by_district <- acc_join %>%
+  st_drop_geometry() %>%
+  count(shapeID, name = "acc_count")
+
+bkkdist_acc <- bkkdist_t %>%
+  left_join(acc_by_district, by = "shapeID") %>%
+  mutate(acc_count = replace_na(acc_count, 0))
+```
+
+#### 6.3.2 Normalize by road length
+
+```{r}
+road_length <- bkkroad_t %>%
+  st_join(bkkdist_t) %>%
+  mutate(len_m = st_length(geometry)) %>%   
+  st_drop_geometry() %>%                    
+  group_by(shapeID) %>%
+  summarise(road_len_km = as.numeric(sum(len_m)) / 1000)
+```
+
+::: callout-note
+Road length is converted to kilometres for ease of interpretation. 
+:::
+
+```{r}
+bkkdist_acc <- bkkdist_acc %>%
+  left_join(road_length, by = "shapeID") %>%
+  mutate(acc_rate = acc_count / road_len_km)
+```
+
+#### 6.3.3 Create spatial neighbour structure
+
+```{r}
+wm_q <- st_contiguity(bkkdist_acc)
+wt   <- st_weights(wm_q)
+
+bkkdist_acc <- bkkdist_acc %>% mutate(nb = wm_q, wt = wt)
+```
+
+#### 6.3.4 Global Moran's I test
+
+```{r}
+global_moran_test(bkkdist_acc$acc_rate, bkkdist_acc$nb, bkkdist_acc$wt)
+```
+The test results provide strong statistical evidence (Moran I = 0.2056, std dev = 3.3793, p-value < 0.001) that fatal accident rates significantly positively spatially autocorrelated within BMR.
+
+#### 6.3.5 Local Moran's I test
+
+Next, we will look to identify the high-risk and low-risk clusters. 
+
+```{r}
+lisa <- bkkdist_acc %>%
+  mutate(local_moran(acc_rate, nb, wt))
+
+tm_shape(lisa) +
+  tm_polygons(fill = "ii",
+              fill.scale = tm_scale_intervals(style = "pretty", n = 5, values = "brewer.blues"),
+              fill.legend = tm_legend(title = "Local Moran's I")) +
+  tm_borders() +
+  tm_title("Accident Rate by District")
+```
+
+Preliminary view shows that there are many districts with little to no spatial correlation, a small outlier cluster (later confirmed as Low-High), and a small High-High cluster core.
+
+```{r}
+lisa_sig <- lisa %>% filter(p_ii < 0.05)
+
+tm_shape(lisa) + tm_polygons(fill = "grey90") + tm_borders() +
+  tm_shape(lisa_sig) +
+  tm_polygons(fill = "mean",
+              fill.scale = tm_scale_categorical(values = c("blue", "lightblue", "pink", "red")),
+              fill.legend = tm_legend(title = "LISA Cluster (p<0.05)")) +
+  tm_title("Statistically Significant Hot/Cold Spots")
+```
+Statistically significant clusters confirm that most districts show no significant spatial correlation, with a small Low-High outlier and a small High-High cluster core identified at p<0.05.
+
+
+## 7. Question 2: Most Vulnerable Road Users
+
+Next, we will look at the fatality rates across different groups of road users.
+
+### 7.1 Fatal Accidents by Road User
+
+```{r}
+bkkacc_g %>%
+  st_drop_geometry() %>%
+  count(vehicle_type, sort = TRUE) %>%
+  mutate(pct = round(100 * n / sum(n), 1)) %>%
+  ggplot(aes(x = reorder(vehicle_type, n), y = n)) +
+  geom_col(fill = "pink") +
+  geom_text(aes(label = paste0(pct, "%")), hjust = -0.1) +
+  coord_flip() +
+  labs(title = "Fatal Accidents by Road User", x = NULL, y = "Count") +
+  theme_minimal()
+```
+
+The majority of road users who met with fatal accidents were motorcyclists.
+
+### 7.2 Age distribution by vehicle type
+
+```{r}
+bkkacc_g %>%
+  st_drop_geometry() %>%
+  filter(!is.na(age)) %>%
+  ggplot(aes(x = vehicle_type, y = age)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(title = "Age Distribution by Road User", x = NULL, y = "Age") +
+  coord_flip() +
+  theme_minimal()
+```
+
+The age of motorcyclists who meet with fatal accidents tend to be younger than car drivers.
+
+### 7.3 Gender by vehicle type
+
+```{r}
+bkkacc_g %>%
+  st_drop_geometry() %>%
+  filter(!is.na(sex)) %>%
+  count(vehicle_type, sex) %>%
+  ggplot(aes(x = vehicle_type, y = n, fill = sex)) +
+  geom_col(position = "fill") +
+  scale_fill_manual(values = c("Female" = "pink", "Male" = "lightblue")) +
+  labs(title = "Sex Distribution by Road User Type", x = NULL, y = "Proportion") +
+  coord_flip() +
+  theme_minimal()
+```
+
+Disregarding Pedestrain and Bicycle which have very little data, men outnumber women in almost every category of road user fatalities in the remaining categories.
+
+### 7.4 Spatial Density by Vehicle Type
+
+Plot car and motorcycle road fatalities against each other.
+
+```{r}
+car_ppp <- bkkacc_g %>% 
+  filter(vehicle_type == "Car") %>%
+  st_coordinates() %>% 
+  as.ppp(W = bkk_owin)
+
+motorcycle_ppp <- bkkacc_g %>% 
+  filter(vehicle_type == "Motorcycle") %>%
+  st_coordinates() %>% 
+  as.ppp(W = bkk_owin)
+
+kde_car <- density(car_ppp, sigma = bw.diggle(car_ppp))
+kde_motorcycle <- density(motorcycle_ppp, sigma = bw.diggle(motorcycle_ppp))
+
+par(mfrow = c(1,2))
+plot(kde_car, main = "Car Fatality Density")
+plot(kde_motorcycle, main = "Motorcycle Fatality Density")
+par(mfrow = c(1,1))
+```
+
+The central hotspot is being driven primarily by motorcycle fatalities. The High-High cluster core is essentially a motorcycle fatality hotspot unlikes car fatalities which are more spread out across BMR. 
+
+### 7.5 Marked Point Pattern
+
+Tests whether car and motorcycle fatalities cluster in the same locations, or spatially distinct areas (random labeling test).
+
+```{r}
+acc_coords <- st_coordinates(bkkacc_g)
+marks_vt   <- factor(bkkacc_g$vehicle_type)
+
+bkkacc_marked_ppp <- ppp(x = acc_coords[,1], y = acc_coords[,2],
+                          window = bkk_owin, marks = marks_vt)
+```
+
+```{r}
+Kcross_result <- Kcross(bkkacc_marked_ppp, i = "Car", j = "Motorcycle", 
+                         correction = "border")
+plot(Kcross_result, main = "Cross-K: Car vs Motorcycle")
+```
+
+```{r}
+Kcross_env <- envelope(bkkacc_marked_ppp, Kcross, i = "Car", j = "Motorcycle", 
+                        nsim = 99)
+plot(Kcross_env, main = "Cross-K Envelope: Random Labelling Test")
+```
+
+The Cross-K envelope test (999 simulations under random labelling) shows that the observed cross-K function (K̂_obs, black line) lies consistently above the simulation envelope (grey band) at larger distances (roughly beyond r ≈ 10,000–12,000), indicating that car and motorcycle fatalities are significantly spatially associated with one another — occurring closer together than would be expected if the two accident types were randomly and independently distributed across the same locations. This confirms that car and motorcycle fatalities share overlapping high-risk zones, rather than occurring in spatially independent or segregated areas, even though their individual density patterns (one concentrated central hotspot for motorcycles vs. multiple smaller scattered clusters for cars) differ in shape.
+
+### 7.6 Association between Vehicle Type and Cause Code
+
+#### 7.6.1 Initial test
+
+```{r}
+set.seed(1234)
+tbl <- table(bkkacc_g$vehicle_type, bkkacc_g$cause_code)
+chisq.test(tbl, simulate.p.value = TRUE)
+
+```
+The above shows that vehicle type and cause code are associated.
+
+#### 7.6.2 Residuals
+
+```{r}
+chisq.test(tbl, simulate.p.value = TRUE)$stdres
+```
+This shows that the association was largely driven by an an extreme residual (21.17) for Pedestrian × cause code V099 for which there was only 1 fatality record in BMR. 
+
+#### 7.6.3 Updated test (excluding Pedestrian)
+
+```{r}
+bkkacc_exc_ped <- bkkacc_g %>%
+  st_drop_geometry() %>%
+  filter(vehicle_type != "Pedestrian") %>%
+  droplevels()
+
+tbl_exc_ped <- table(bkkacc_exc_ped$vehicle_type, bkkacc_exc_ped$cause_code)
+
+chisq.test(tbl_exc_ped, simulate.p.value = TRUE)
+```
+
+The final test shows no statistically significant association between vehicle type and cause code.
+
+
+## 8. Question 3: Does Medical Facilities Proximity Matter? 
+
+In this section, we will use datasets from [The Humanitarian Data Exchange](https://data.humdata.org/).
+
+### 8.1 The Data
+
+The data is available in lines, polygons and points. We will use points for this analysis.
+
+- Hospitals (points)
+
+```{r}
+hospitals <- st_read("data/geospatial/HealthFacilitiesPoints.geojson")
+
+names(hospitals)
+unique(hospitals$amenity) 
+```
+Transform to EPSG:32647 (UTM 47N, meters)
+
+```{r}
+hospitals_t <- st_transform(hospitals, 32647) %>% st_filter(bkk_t)
+```
+
+### 8.2 Distance-to-nearest-hospital Raster
+
+Proximity distance used is 500 metres.
+
+```{r}
+r_template <- rast(vect(bkk_t), resolution = 500)
+hosp_vect  <- vect(hospitals_t)
+
+dist_to_hospital <- distance(r_template, hosp_vect)
+names(dist_to_hospital) <- "dist_m"
+```
+
+#### 8.2.1 Distance at each accident location
+
+```{r}
+bkkacc_g <- bkkacc_g %>%
+  mutate(dist_to_hospital_m = terra::extract(dist_to_hospital, vect(bkkacc_g))[,2])
+
+summary(bkkacc_g$dist_to_hospital_m)
+```
+::: callout-note
+- The closest fatal accident occurred only 82 meters from a hospital.
+- 25% of accidents occurred within 825m of a hospital
+- Half of all fatal accidents occurred within about 1.6 km of the nearest hospital.
+- The mean is 2.6 km which suggests that most accidents occur quite close to hospitals but are skewed by a smaller number that occur far away.
+- 75% of accidents occurred within 3.4 km of a hospital
+- The maximum distance is likely an outlier.
+:::
+
+#### 8.2.2 Observed vs Expected proportion within distance bands
+
+If fatalities were spatially random relative to hospitals, the % of accidents within X km should roughly match the % of the study area within X km. A gap suggests accidents are over/under-represented near hospitals.
+
+```{r}
+dist_class <- classify(dist_to_hospital, rcl = c(0, 2000, 5000, Inf))
+area_props <- freq(dist_class) %>%
+  mutate(pct_area = round(100 * count / sum(count), 1))
+
+acc_props <- bkkacc_g %>%
+  st_drop_geometry() %>%
+  mutate(dist_band = cut(dist_to_hospital_m, breaks = c(0, 2000, 5000, Inf),
+                          labels = c("0-2km", "2-5km", ">5km"))) %>%
+  count(dist_band) %>%
+  mutate(pct_accidents = round(100 * n / sum(n), 1))
+
+acc_props
+area_props
+```
+
+#### 8.2.3 Raster Distance Surface (using terra & tmap)
+
+```{r}
+tm_shape(dist_to_hospital) +
+  tm_raster(col.scale = tm_scale_continuous(values = "brewer.YlOrRd"),
+            col.legend = tm_legend(title = "Distance to Nearest Hospital (m)")) +
+  tm_shape(hospitals_t) + tm_dots(fill = "blue", size = 0.15) +
+  tm_shape(bkkacc_g) + tm_dots(fill = "black", size = 0.02) +
+  tm_shape(bkk_t) + tm_borders(col = "grey30") +
+  tm_title("Distance to Nearest Hospital vs Fatal Accident Locations") +
+  tm_layout(legend.outside = TRUE)
+```
+
+### 8.3 Hypothetical Conclusion
+
+Fatal accidents were disproportionately concentrated within 2km of a hospital (56.6% of accidents vs. 17.1% of land area). Areas outside of 5km accounts for only 14.9% of accidents despite covering 60% of the land area. It suggests that both hospital density and accident risk are due to population density and traffic exposure factors rather than related to each other.  
+
+## 9 Question 4: Do areas served by the BTS & MRT network have lower accident rates?
+
+This section will use data pulled directly from using osdata.
+
+### 9.1 Data Analysis.
+
+```{r}
+pacman::p_load(osmdata)
+
+bb <- getbb("Bangkok, Thailand")
+
+bts_query <- opq(bbox = bb) %>%
+  add_osm_feature(key = "railway", value = "subway")
+
+bts_result <- osmdata_sf(bts_query)
+bts_lines_raw <- bts_result$osm_lines
+
+bts_lines_raw %>% st_drop_geometry() %>% 
+  select(any_of(c("name", "operator", "network"))) %>% distinct()
+```
+
+Filter to BTS & MRT.
+
+```{r}
+rapid_transit_lines <- bts_lines_raw %>%
+  filter(str_detect(name, "บีทีเอส|มหานคร"))
+
+nrow(rapid_transit_lines)
+```
+Perform a sanity check. 
+
+```{r}
+rapid_transit_lines %>% 
+  st_drop_geometry() %>% 
+  select(name) %>% 
+  distinct()
+plot(st_geometry(rapid_transit_lines))
+```
+
+Image of Bangkok Transit Map for comparison.
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE}
+include_graphics("images/BTSMRT.png")
+```
+
+```{r}
+rapid_transit_t <- st_transform(rapid_transit_lines, 32647) %>% st_filter(bkk_t)
+
+nrow(rapid_transit_t)
+transit_buffer <- st_buffer(rapid_transit_t, dist = 500) %>% st_union() 
+
+bkkacc_g <- bkkacc_g %>%
+  mutate(transit_served = st_intersects(., transit_buffer, sparse = FALSE)[,1])
+served_area_km2   <- as.numeric(st_area(transit_buffer)) / 1e6
+total_area_km2    <- as.numeric(st_area(st_union(bkk_t))) / 1e6
+unserved_area_km2 <- total_area_km2 - served_area_km2
+
+bkkacc_g %>%
+  st_drop_geometry() %>%
+  count(transit_served) %>%
+  mutate(area_km2 = c(unserved_area_km2, served_area_km2),
+         rate_per_km2 = round(n / area_km2, 3))
+tm_shape(bkk_t) + tm_borders(col = "grey60") +
+  tm_shape(transit_buffer) + tm_polygons(fill = "lightgreen", fill_alpha = 0.4) +
+  tm_shape(rapid_transit_t) + tm_lines(col = "darkgreen", lwd = 2) +
+  tm_shape(bkkacc_g) +
+  tm_dots(fill = "transit_served",
+          fill.scale = tm_scale_categorical(values = c("red", "blue")),
+          fill.legend = tm_legend(title = "Within 500m of BTS & MRT")) +
+  tm_title("Fatal Accidents Relative to Rapid Transit Coverage") +
+  tm_layout(legend.outside = TRUE)
+```
+
+### 9.2 Hypothetical Conclusion
+
+While the majority of fatal accidents (486 out of 530) occurred outside the 500m rapid transit buffer, this reflects the transit buffer's small geographic footprint (131 km²) rather than lower accident risk within it. This is confirmed by the rate per km² (0.336 within the buffer vs. 0.065 outside), which is actually higher in the transit buffer area. This suggests that accident risk is largely driven by population density and traffic exposure factors rather than the availability of mass rapid transit itself.
+

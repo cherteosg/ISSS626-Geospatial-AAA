@@ -704,7 +704,7 @@
     "href": "In-Class_Ex5/In-Class_Ex5.html",
     "title": "In Class Exercise 5",
     "section": "",
-    "text": "pacman::p_load(sf, sfdep, tmap, tidyverse)\nhunan &lt;- st_read(dsn = \"data/geospatial\", \n                  layer = \"Hunan\")\n\nReading layer `Hunan' from data source \n  `C:\\Users\\chert\\Desktop\\cherteosg\\ISSS626-GSA\\In-Class_Ex5\\data\\geospatial' \n  using driver `ESRI Shapefile'\nSimple feature collection with 88 features and 7 fields\nGeometry type: POLYGON\nDimension:     XY\nBounding box:  xmin: 108.7831 ymin: 24.6342 xmax: 114.2544 ymax: 30.12812\nGeodetic CRS:  WGS 84\nhunan2012 &lt;- read_csv(\"data/aspatial/Hunan_2012.csv\")\n\nRows: 88 Columns: 29\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \",\"\nchr  (2): County, City\ndbl (27): avg_wage, deposite, FAI, Gov_Rev, Gov_Exp, GDP, GDPPC, GIO, Loan, ...\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.\nhunan_GDPCC &lt;- left_join(hunan, hunan2012) %&gt;% \n  select(1:4, 7, 15, 16)\n\nJoining with `by = join_by(County)`\nwm_q &lt;- hunan_GDPCC %&gt;%\n    mutate( nb = \n        st_contiguity(geometry),\n            wt = st_weights(nb,\n                            style = \"W\"),\n          .before = 1)"
+    "text": "pacman::p_load(sf, sfdep, tmap, tidyverse)\n\n\nhunan &lt;- st_read(dsn = \"data/geospatial\", \n                  layer = \"Hunan\")\n\nReading layer `Hunan' from data source \n  `C:\\Users\\chert\\Desktop\\cherteosg\\ISSS626-GSA\\In-Class_Ex5\\data\\geospatial' \n  using driver `ESRI Shapefile'\nSimple feature collection with 88 features and 7 fields\nGeometry type: POLYGON\nDimension:     XY\nBounding box:  xmin: 108.7831 ymin: 24.6342 xmax: 114.2544 ymax: 30.12812\nGeodetic CRS:  WGS 84\n\n\n\nhunan2012 &lt;- read_csv(\"data/aspatial/Hunan_2012.csv\")\n\nRows: 88 Columns: 29\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \",\"\nchr  (2): County, City\ndbl (27): avg_wage, deposite, FAI, Gov_Rev, Gov_Exp, GDP, GDPPC, GIO, Loan, ...\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.\n\n\n\nhunan_GDPCC &lt;- left_join(hunan, hunan2012) %&gt;% \n  select(1:4, 7, 15, 16)\n\nJoining with `by = join_by(County)`\n\n\n\nwm_q &lt;- hunan_GDPCC %&gt;%\n    mutate( nb = \n        st_contiguity(geometry),\n            wt = st_weights(nb,\n                            style = \"W\"),\n          .before = 1)\n\nCreate Global Moran I\n\nmoranI &lt;- global_moran (wm_q$GDPPC,\n                        wm_q$nb,\n                        wm_q$wt)\nglimpse(moranI)\n\nList of 2\n $ I: num 0.301\n $ K: num 7.64\n\n\n\nset.seed(1234)\n\nglobal_moran_perm(wm_q$GDPPC,\n                   wm_q$nb,\n                   wm_q$wt,\n                   nsim = 99)\n\n\n    Monte-Carlo simulation of Moran I\n\ndata:  x \nweights: listw  \nnumber of simulations + 1: 100 \n\nstatistic = 0.30075, observed rank = 100, p-value &lt; 2.2e-16\nalternative hypothesis: two.sided\n\n\n\nlisa &lt;- wm_q %&gt;%\n  mutate(local_moran = local_moran(\n    GDPPC, nb, wt, nsim = 99),\n          .before = 1) %&gt;%\n  unnest(local_moran)\n\nPlotting Lisa Map\n\nlisa_sig &lt;- lisa %&gt;%\n  filter(p_ii_sim &lt; 0.05)\ntmap_mode(\"plot\")\n\nℹ tmap modes \"plot\" - \"view\"\nℹ toggle with `tmap::ttm()`\n\ntm_shape(lisa) +\n  tm_polygons() +\n  tm_borders(fill_alpha = 0.5) +\ntm_shape(lisa_sig) +\n  tm_polygons(fill = \"mean\",\n              fill.legend = tm_legend(\n                text.size = 1,\n                width = 6)) +\n  tm_borders(fill_alpha = 0.4) +\n  tm_layout(legend.title.size =1.25)"
   },
   {
     "objectID": "In-Class_Ex5/In-Class_Ex5.html#create-global-moran-i",
@@ -754,5 +754,131 @@
     "title": "Geospatial Analytics For Public Safety",
     "section": "Accident Data",
     "text": "Accident Data\nText is in Thai so AI was used for translation\n\nbkkacc &lt;- read_csv(\"data/aspatial/bkkdata_t.csv\")\n\n\nhead(bkkacc)\n\n# A tibble: 6 × 13\n    age sex    nationality person_district person_province  confirmed_death_date\n  &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;       &lt;chr&gt;           &lt;chr&gt;            &lt;chr&gt;               \n1    49 Male   &lt;NA&gt;        Khanom          Nakhon Si Thamm… 11/1/2024           \n2    59 Female &lt;NA&gt;        Phon            Khon Kaen        13/3/2024           \n3    15 Male   &lt;NA&gt;        Buachet         Surin            30/6/2024           \n4    19 Male   &lt;NA&gt;        Mae Sot         Tak              2/7/2024            \n5    44 Male   &lt;NA&gt;        Chanuman        Amnat Charoen    6/7/2024            \n6    61 Male   &lt;NA&gt;        Wiset Chai Chan Ang Thong        6/5/2024            \n# ℹ 7 more variables: acc_sub_district &lt;chr&gt;, acc_district &lt;chr&gt;,\n#   province_of_death &lt;chr&gt;, acc_lat &lt;dbl&gt;, acc_long &lt;dbl&gt;, cause_code &lt;chr&gt;,\n#   vehicle_type &lt;chr&gt;\n\n\n\nnames(bkkacc)\n\n [1] \"age\"                  \"sex\"                  \"nationality\"         \n [4] \"person_district\"      \"person_province\"      \"confirmed_death_date\"\n [7] \"acc_sub_district\"     \"acc_district\"         \"province_of_death\"   \n[10] \"acc_lat\"              \"acc_long\"             \"cause_code\"          \n[13] \"vehicle_type\"        \n\n\nDrop rows with missing coordinates\n\nsum(is.na(bkkacc$acc_lat) | is.na(bkkacc$acc_long))\n\n[1] 9516\n\nbkkacc &lt;- bkkacc %&gt;% filter(!is.na(acc_lat), !is.na(acc_long))\n\nConvert to sf points (currently WGS84 lat/long)\n\nbkkacc_sf &lt;- st_as_sf(bkkacc, coords = c(\"acc_lat\", \"acc_long\"), crs = 4326)\n\nReproject to match your other layers (UTM 47N)\n\nbkkacc_t &lt;- st_transform(bkkacc_sf, 32647)\n\nClip to Greater Bangkok boundary\n\nbkkacc_g &lt;- st_filter(bkkacc_t, bkk_t)"
+  },
+  {
+    "objectID": "Take-Home_Ex1/Take-Home_Ex1_ER.html#why-geospatial-analysis-on-fatal-road-accidents",
+    "href": "Take-Home_Ex1/Take-Home_Ex1_ER.html#why-geospatial-analysis-on-fatal-road-accidents",
+    "title": "Geospatial Analytics For Road Safety",
+    "section": "Why Geospatial Analysis on Fatal Road Accidents?",
+    "text": "Why Geospatial Analysis on Fatal Road Accidents?\n\nFatal road accidents are rarely uniformly distributed. Aggregated national statistics make it hard to identify high risk clusters a.k.a. hotspots.\nData analytics allows governments to implement location-specific interventions, backed by scientific evidence, to safeguard public road safety."
+  },
+  {
+    "objectID": "Take-Home_Ex1/Take-Home_Ex1_ER.html#why-bangkok-metropolitan-region",
+    "href": "Take-Home_Ex1/Take-Home_Ex1_ER.html#why-bangkok-metropolitan-region",
+    "title": "Geospatial Analytics For Road Safety",
+    "section": "Why Bangkok Metropolitan Region?",
+    "text": "Why Bangkok Metropolitan Region?\n\nThailand is ranked among the 10 highest road traffic fatality rates in the world (WHO, 2019).\nIts densely-populated capital, Bangkok, experiences among the highest levels of traffic exposure and fatal road accidents in the country.\nThe Bangkok Metropolitan Region (BMR) was used for the study area to avoid boundary/edge effects in spatial analysis and reflect the interconnected transport network that connects Bangkok and its surrounding provinces.\n\nStudy Area\nBangkok Metropolitan Region (BMR) — 1 metropolis, 5 surrounding provinces:\n\nBangkok (metropolis)\nNonthaburi\nPathum Thani\nSamut Prakan\nSamut Sakhon\nNakhon Pathom\n\n79 districts across one metropolis and five provinces form the spatial unit for district-level analysis."
+  },
+  {
+    "objectID": "Take-Home_Ex1/Take-Home_Ex1_ER.html#key-research-questions",
+    "href": "Take-Home_Ex1/Take-Home_Ex1_ER.html#key-research-questions",
+    "title": "Geospatial Analytics For Road Safety",
+    "section": "Key Research Questions",
+    "text": "Key Research Questions\n\nWhere are the statistically significant hot spots for road fatalities?\nWhich group of road users are the most vulnerable?\nDoes proximity to hospitals reduce road accident fatality rates?\nDo areas served by the BTS & MRT network have lower fatality rates?"
+  },
+  {
+    "objectID": "Take-Home_Ex1/Take-Home_Ex1_ER.html#study-area",
+    "href": "Take-Home_Ex1/Take-Home_Ex1_ER.html#study-area",
+    "title": "Geospatial Analytics For Road Safety",
+    "section": "Study Area",
+    "text": "Study Area\nBangkok Metropolitan Region (BMR) — 1 metropolis, 5 surrounding provinces:\n\nBangkok (metropolis)\nNonthaburi\nPathum Thani\nSamut Prakan\nSamut Sakhon\nNakhon Pathom\n\n79 districts across one metropolis and five provinces form the spatial unit for district-level analysis."
+  },
+  {
+    "objectID": "Take-Home_Ex1/Take-Home_Ex1_ER.html#data-sources",
+    "href": "Take-Home_Ex1/Take-Home_Ex1_ER.html#data-sources",
+    "title": "Geospatial Analytics For Road Safety",
+    "section": "Data Sources",
+    "text": "Data Sources\n\n\n\n\n\n\n\nDataset\nSource\n\n\n\n\nAdministrative boundaries (ADM1/ADM2)\ngeoBoundaries\n\n\nRoad network\nOpenStreetMap, via Geofabrik\n\n\nFatal road accident records (2024)\nKaggle — Thailand Road Fatalities dataset (Thai-language, AI-translated, spot-checked)\n\n\nHealth Facilities\nThe Humanitarian Data Exchange (HDX)\n\n\nBTS Skytrain & MRT lines\nOpenStreetMap, via osmdata (R package)\n\n\n\nFull data managemet and wranling is documened in the .qmd file."
+  },
+  {
+    "objectID": "Take-Home_Ex1/Take-Home_Ex1_ER.html#analytical-approach",
+    "href": "Take-Home_Ex1/Take-Home_Ex1_ER.html#analytical-approach",
+    "title": "Geospatial Analytics For Road Safety",
+    "section": "Analytical Approach",
+    "text": "Analytical Approach\n\nData preparation: validate coordinates, detect and address duplicated, CRS transformation to EPSG:32647(UTM Zone 47N), spatial and temporal filtering to BMR.\nFirst-order Analysis: Kernel Density Estimation with Bandwidth Sensitivity Testing\nSecond-order Analysis: G-function vs. Complete Spatial Randomness (CSR); Marked Point Pattern (Cross-K) by Vehicle Type\nDistrict-level Spatial Autocorrelation: Global and Local Moran’s I on road-length-normalised accident rates\nProximity analysis: distance-to-nearest-hospital raster; transit catchment buffer comparison"
+  },
+  {
+    "objectID": "Take-Home_Ex1/Take-Home_Ex1_ER.html#key-findings-question-1-hot-spots",
+    "href": "Take-Home_Ex1/Take-Home_Ex1_ER.html#key-findings-question-1-hot-spots",
+    "title": "Geospatial Analytics For Road Safety",
+    "section": "Key Findings — Question 1: Hot Spots",
+    "text": "Key Findings — Question 1: Hot Spots\n\nKDE reveals a single dominant hotspot in the central BMR, with density decreasing toward the periphery\nThe G-function test confirms fatalities are significantly clustered, not randomly distributed (observed pattern consistently outside the CSR simulation envelope)\nGlobal Moran’s I on road-length-normalised accident rates is significant (I = 0.206, p &lt; 0.001) — accident rates are spatially autocorrelated across districts\nLocal Moran’s I (LISA) identifies a small but statistically significant High-High cluster core, alongside a small Low-High outlier; most districts show no significant spatial association"
+  },
+  {
+    "objectID": "Take-Home_Ex1/Take-Home_Ex1_ER.html#key-findings-q2-vulnerable-road-users",
+    "href": "Take-Home_Ex1/Take-Home_Ex1_ER.html#key-findings-q2-vulnerable-road-users",
+    "title": "Geospatial Analytics For Road Safety",
+    "section": "Key Findings — Q2: Vulnerable Road Users",
+    "text": "Key Findings — Q2: Vulnerable Road Users\n\nMotorcyclists account for the majority of fatal accident victims\nMotorcyclist victims skew younger than car-driver victims\nMen outnumber women across nearly every road-user category (excluding pedestrians/cyclists, where sample size is small)\nThe central hotspot from Q1 is driven primarily by motorcycle fatalities\nCross-K analysis shows car and motorcycle fatalities are spatially associated at larger distances — the two groups share overlapping high-risk zones rather than occurring in segregated areas\nNo significant association between vehicle type and cause code once a single outlier pedestrian record is excluded"
+  },
+  {
+    "objectID": "Take-Home_Ex1/Take-Home_Ex1_ER.html#key-findings-q3-hospital-proximity",
+    "href": "Take-Home_Ex1/Take-Home_Ex1_ER.html#key-findings-q3-hospital-proximity",
+    "title": "Geospatial Analytics For Road Safety",
+    "section": "Key Findings — Q3: Hospital Proximity",
+    "text": "Key Findings — Q3: Hospital Proximity\n\n56.6% of fatal accidents occurred within 2km of a hospital, versus only 17.1% of land area falling within that same distance band\nAreas beyond 5km from a hospital account for just 14.9% of accidents, despite covering 60% of land area\nHypothetical conclusion: this pattern likely reflects that both hospital placement and accident risk are driven by the same underlying factor — population density and traffic exposure — rather than any direct relationship between hospital proximity and fatality risk itself"
+  },
+  {
+    "objectID": "Take-Home_Ex1/Take-Home_Ex1_ER.html#key-findings-q4-bts-mrt-proximity",
+    "href": "Take-Home_Ex1/Take-Home_Ex1_ER.html#key-findings-q4-bts-mrt-proximity",
+    "title": "Geospatial Analytics For Road Safety",
+    "section": "Key Findings — Q4: BTS & MRT Proximity",
+    "text": "Key Findings — Q4: BTS & MRT Proximity\n\nMost fatal accidents (486 of 530) occurred outside the 500m rapid transit buffer — but this reflects the buffer’s small geographic footprint (131 km²), not lower risk within it\nOnce normalised by area, the accident rate is actually higher inside the transit buffer (0.336 per km²) than outside it (0.065 per km²)\nHypothetical conclusion: this again likely reflects population density and traffic exposure concentrated around transit nodes, rather than transit access itself increasing risk"
+  },
+  {
+    "objectID": "Take-Home_Ex1/Take-Home_Ex1_ER.html#visual-evidence-1-2",
+    "href": "Take-Home_Ex1/Take-Home_Ex1_ER.html#visual-evidence-1-2",
+    "title": "Geospatial Analytics For Road Safety",
+    "section": "Visual Evidence 1 & 2",
+    "text": "Visual Evidence 1 & 2\n\n\nKDE Hotspot Map\n\n\n\n\n\n\n\n\n\n\n\nLISA Significant Clusters Map\n\n\n\n\n\n\n\n\n\n::::::"
+  },
+  {
+    "objectID": "Take-Home_Ex1/Take-Home_Ex1_ER.html#visual-evidence-3-4",
+    "href": "Take-Home_Ex1/Take-Home_Ex1_ER.html#visual-evidence-3-4",
+    "title": "Geospatial Analytics For Road Safety",
+    "section": "Visual Evidence 3 & 4",
+    "text": "Visual Evidence 3 & 4\nhospital distance raster, transit buffer map\n\n\nHospital Proximity Raster\n\n\n\n\n\n\n\n\n\n\n\nTransit Buffer Map\n\n\n\n\n\n\n\n\n\n::::::"
+  },
+  {
+    "objectID": "Take-Home_Ex1/Take-Home_Ex1_ER.html#data-quality-recap",
+    "href": "Take-Home_Ex1/Take-Home_Ex1_ER.html#data-quality-recap",
+    "title": "Geospatial Analytics For Road Safety",
+    "section": "Data Quality — Recap",
+    "text": "Data Quality — Recap\n\nSource data was in Thai language and translated using an AI tool, resulting in data integrity loss but mitigated with manual spot-checking for accuracy.\nLatitude/longitude columns in the raw file were found to be swapped and were corrected based on known coordinate ranges for Thailand.\n16 duplicate records (with identical coordinates, death date, age, sex, cause code) were identified and removed as likely data entry errors.\nA significant number of records with missing coordinates were excluded (9516 of which 957 were for BMR out of a total 1487 BMRrecords), reflecting poor data quality.\nGenuine distinct fatalities sharing the same exact coordinates were jittered so that each contributes separately to the Kernel Density Estimation (KDE) surface instead of merging into a single point or creating a false density spike at the specific coordinate."
+  },
+  {
+    "objectID": "Take-Home_Ex1/Take-Home_Ex1_ER.html#conclusion",
+    "href": "Take-Home_Ex1/Take-Home_Ex1_ER.html#conclusion",
+    "title": "Geospatial Analytics For Road Safety",
+    "section": "Conclusion",
+    "text": "Conclusion\n\nLocation-Specific Resource Allocation: Statistically significant High-High cluster districts identified should be prioritised for road safety infrastructure review and increased traffic police enforcement.\nMotorcyclist-Focused Interventions: Targeted measures such as increased rider education, stringent license requirements or physical infrastructure improvements such as motorcycles-only dedicated lanes can be implemented in tandem for this user group.\nSuggested Next Steps: Incorporating reliable population density and traffic exposure data will help strengthen policy-making decisions based on geospatial analysis for Bangkok and other provinces with higher rates of fatal road accidents. An attempt to use OSM population density data sourced from The Humanitarian Data Exchange proved futile, which limited the analytical depth and reach of this study."
+  },
+  {
+    "objectID": "Take-Home_Ex1/Take-Home_Ex1_ER.html#key-findings-questions-1-2-hot-spots-vulnerable-road-users",
+    "href": "Take-Home_Ex1/Take-Home_Ex1_ER.html#key-findings-questions-1-2-hot-spots-vulnerable-road-users",
+    "title": "Geospatial Analytics For Road Safety",
+    "section": "Key Findings — Questions 1 & 2: Hot Spots & Vulnerable Road Users",
+    "text": "Key Findings — Questions 1 & 2: Hot Spots & Vulnerable Road Users\n\nKDE reveals a single dominant hotspot in the central BMR, with density decreasing toward the periphery\nThe G-function test confirms fatalities are significantly clustered, not randomly distributed (observed pattern consistently outside the CSR simulation envelope)\nGlobal Moran’s I on road-length-normalised accident rates is significant (I = 0.206, p &lt; 0.001) — accident rates are spatially autocorrelated across districts\nLocal Moran’s I (LISA) identifies a small but statistically significant High-High cluster core, alongside a small Low-High outlier; most districts show no significant spatial association\nMotorcyclists account for the majority of fatal accident victims\nMotorcyclist victims skew younger than car-driver victims\nMen outnumber women across nearly every road-user category (excluding pedestrians/cyclists, where sample size is small)\nThe central hotspot from Q1 is driven primarily by motorcycle fatalities\nCross-K analysis shows car and motorcycle fatalities are spatially associated at larger distances — the two groups share overlapping high-risk zones rather than occurring in segregated areas\nNo significant association between vehicle type and cause code once a single outlier pedestrian record is excluded"
+  },
+  {
+    "objectID": "Take-Home_Ex1/Take-Home_Ex1_ER.html#key-findings-questions-3-4-hospital-and-bts-mrt-proximity",
+    "href": "Take-Home_Ex1/Take-Home_Ex1_ER.html#key-findings-questions-3-4-hospital-and-bts-mrt-proximity",
+    "title": "Geospatial Analytics For Road Safety",
+    "section": "Key Findings — Questions 3 & 4: Hospital and BTS & MRT Proximity",
+    "text": "Key Findings — Questions 3 & 4: Hospital and BTS & MRT Proximity\n\n56.6% of fatal accidents occurred within 2km of a hospital, versus only 17.1% of land area falling within that same distance band\nAreas beyond 5km from a hospital account for just 14.9% of accidents, despite covering 60% of land area\nHypothetical conclusion: this pattern likely reflects that both hospital placement and accident risk are driven by the same underlying factor — population density and traffic exposure — rather than any direct relationship between hospital proximity and fatality risk itself\nMost fatal accidents (486 of 530) occurred outside the 500m rapid transit buffer — but this reflects the buffer’s small geographic footprint (131 km²), not lower risk within it\nOnce normalised by area, the accident rate is actually higher inside the transit buffer (0.336 per km²) than outside it (0.065 per km²)\nHypothetical conclusion: this again likely reflects population density and traffic exposure concentrated around transit nodes, rather than transit access itself increasing risk"
+  },
+  {
+    "objectID": "Take-Home_Ex1/Take-Home_Ex1_ER.html#visual-evidence",
+    "href": "Take-Home_Ex1/Take-Home_Ex1_ER.html#visual-evidence",
+    "title": "Geospatial Analytics For Road Safety",
+    "section": "Visual Evidence",
+    "text": "Visual Evidence\n\n\nKDE Hotspot Map\n\n\n\n\n\n\n\n\n\n\nLISA Significant Clusters Map\n\n\n\n\n\n\n\n\n\n\n\n\nHospital Proximity Raster\n\n\n\n\n\n\n\n\n\n\nTransit Buffer Map"
+  },
+  {
+    "objectID": "Take-Home_Ex1/Take-Home_Ex1_ER.html#data-quality",
+    "href": "Take-Home_Ex1/Take-Home_Ex1_ER.html#data-quality",
+    "title": "Geospatial Analytics For Road Safety",
+    "section": "Data Quality",
+    "text": "Data Quality\n\nSource data was in Thai language and translated using an AI tool, resulting in data integrity loss but mitigated with manual spot-checking for accuracy.\nLatitude/longitude columns in the raw file were found to be swapped and were corrected based on known coordinate ranges for Thailand.\n16 duplicate records (with identical coordinates, death date, age, sex, cause code) were identified and removed as likely data entry errors.\nA significant number of records with missing coordinates were excluded (9516 of which 957 were for BMR out of a total 1487 BMRrecords), reflecting poor data quality.\nGenuine distinct fatalities sharing the same exact coordinates were jittered so that each contributes separately to the Kernel Density Estimation (KDE) surface instead of merging into a single point or creating a false density spike at the specific coordinate."
   }
 ]
