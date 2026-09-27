@@ -76,7 +76,7 @@ editor: visual
 
 ## Key Findings {.smaller}
 
-**Question 1 : Hot Spots** 
+**Question 1 : Hot Spots**
 
 - KDE reveals a **single dominant hotspot** in the central BMR, with density decreasing toward the periphery
 
@@ -118,10 +118,10 @@ editor: visual
 
 - **Hypothetical conclusion**: this again likely reflects population density and traffic exposure concentrated around transit nodes, rather than transit access itself increasing risk.
 
-## Visual Evidence
+## Visual Evidence {.smaller}
 
 ::::: columns
-::: {.column width="45%"}
+::: {.column width="35%"}
 KDE Hotspot Map
 
 ```{r,echo=FALSE, warning=FALSE, message=FALSE, out.width="120%"}
@@ -129,7 +129,7 @@ knitr::include_graphics("images/KDE.png")
 ```
 :::
 
-::: {.column width="45%"}
+::: {.column width="35%"}
 LISA Significant Clusters Map
 
 ```{r,echo=FALSE, warning=FALSE, message=FALSE, out.width="120%"}
@@ -139,7 +139,7 @@ knitr::include_graphics("images/Lisa.png")
 :::::
 
 ::::: columns
-::: {.column width="45%"}
+::: {.column width="35%"}
 Hospital Proximity Raster
 
 ```{r,echo=FALSE, warning=FALSE, message=FALSE, out.width="120%"}
@@ -147,7 +147,7 @@ knitr::include_graphics("images/Hospital.png")
 ```
 :::
 
-::: {.column width="45%"}
+::: {.column width="35%"}
 Transit Buffer Map
 
 ```{r,echo=FALSE, warning=FALSE, message=FALSE,out.width="120%"}
