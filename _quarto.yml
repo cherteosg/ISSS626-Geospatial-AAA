@@ -32,8 +32,12 @@ website:
           href: "In-class_Ex5/In-class_Ex5.html"
     - text: "Take Home Exercises"
       menu:    
-        - text: "Take Home Exercise 1" 
+        - text: "Take Home Exercise 1 Technical Report" 
           href: "Take-Home_Ex1/Take-Home_Ex1.html"
+        - text: "Take Home Exercise 1 Execute Report" 
+          href: "Take-Home_Ex1/Take-Home_Ex1_ER.html"
+         
+         
          
     right:
       - href: index.qmd
