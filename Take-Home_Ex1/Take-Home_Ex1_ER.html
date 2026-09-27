@@ -134,6 +134,7 @@
 
 <section id="title-slide" class="quarto-title-block center">
   <h1 class="title">Geospatial Analytics For Road Safety</h1>
+  <p class="subtitle">Fatal Road Accidents in the Bangkok Metropolitan Region</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -144,15 +145,14 @@ Cher In Teo
 </div>
 
 </section>
-<section class="slide level2">
-
-<p><strong>Why Geospatial Analysis on Fatal Road Accidents?</strong></p>
+<section id="why-geospatial-analysis-on-fatal-road-accidents" class="slide level2">
+<h2>Why Geospatial Analysis on Fatal Road Accidents?</h2>
 <ul>
 <li class="fragment"><p>Fatal road accidents are rarely uniformly distributed. Aggregated national statistics make it hard to identify high risk clusters a.k.a. <strong>hotspots</strong>.</p></li>
 <li class="fragment"><p>Data analytics allows governments to implement location-specific interventions, backed by scientific evidence, to safeguard public road safety.</p></li>
 </ul>
 </section>
-<section id="why-bangkok-metropolitan-region" class="slide level2">
+<section id="why-bangkok-metropolitan-region" class="slide level2 smaller">
 <h2>Why Bangkok Metropolitan Region?</h2>
 <ul>
 <li><p>Thailand is ranked among the <a href="https://www.who.int/docs/default-source/documents/the-power-of-cities/bangkok-case-study-final.pdf?sfvrsn=790ce747_2">10 highest road traffic fatality rates in the world</a> (WHO, 2019).</p></li>
@@ -170,8 +170,7 @@ Cher In Teo
 <li>Nakhon Pathom</li>
 </ul>
 <p>79 districts across one metropolis and five provinces form the spatial unit for district-level analysis.</p>
-
-<img data-src="images/BMR.png" width="62" class="r-stretch"></section>
+</section>
 <section id="key-research-questions" class="slide level2">
 <h2>Key Research Questions</h2>
 <ol type="1">
@@ -217,42 +216,50 @@ Cher In Teo
 </tr>
 </tbody>
 </table>
-<p><em>Full data managemet and wranling is documened in the <code>.qmd</code> file.</em></p>
+<p><em>Full data management and wrangling is documented in the <code>.qmd</code> file.</em></p>
 </section>
 <section id="analytical-approach" class="slide level2">
 <h2>Analytical Approach</h2>
 <ul>
-<li class="fragment"><p><strong>Data preparation</strong>: validate coordinates, detect and address duplicated, CRS transformation to EPSG:32647(UTM Zone 47N), spatial and temporal filtering to BMR.</p></li>
-<li class="fragment"><p><strong>First-order Analysis</strong>: Kernel Density Estimation with Bandwidth Sensitivity Testing</p></li>
-<li class="fragment"><p><strong>Second-order Analysis</strong>: G-function vs.&nbsp;Complete Spatial Randomness (CSR); Marked Point Pattern (Cross-K) by Vehicle Type</p></li>
-<li class="fragment"><p><strong>District-level Spatial Autocorrelation</strong>: Global and Local Moran’s I on road-length-normalised accident rates</p></li>
-<li class="fragment"><p><strong>Proximity analysis</strong>: distance-to-nearest-hospital raster; transit catchment buffer comparison</p></li>
+<li class="fragment"><p><strong>Data preparation</strong>: validate coordinates, detect and address duplicates, CRS transformation to EPSG:32647 (UTM Zone 47N), spatial and temporal filtering to BMR.</p></li>
+<li class="fragment"><p><strong>First-order Analysis</strong>: Kernel Density Estimation with bandwidth sensitivity testing.</p></li>
+<li class="fragment"><p><strong>Second-order Analysis</strong>: G-function vs.&nbsp;Complete Spatial Randomness (CSR); marked point pattern (Cross-K) by vehicle type.</p></li>
+<li class="fragment"><p><strong>District-level Spatial Autocorrelation</strong>: Global and Local Moran’s I on road-length-normalised accident rates.</p></li>
+<li class="fragment"><p><strong>Proximity analysis</strong>: distance-to-nearest-hospital raster; transit catchment buffer comparison.</p></li>
 </ul>
 </section>
-<section id="key-findings-questions-1-2-hot-spots-vulnerable-road-users" class="slide level2">
-<h2>Key Findings — Questions 1 &amp; 2: Hot Spots &amp; Vulnerable Road Users</h2>
+<section id="key-findings" class="slide level2 smaller">
+<h2>Key Findings</h2>
+<p><strong>Question 1 : Hot Spots</strong></p>
 <ul>
 <li><p>KDE reveals a <strong>single dominant hotspot</strong> in the central BMR, with density decreasing toward the periphery</p></li>
-<li><p>The G-function test confirms fatalities are <strong>significantly clustered</strong>, not randomly distributed (observed pattern consistently outside the CSR simulation envelope)</p></li>
+<li><p>The G-function test confirms fatalities are <strong>significantly clustered</strong>, not randomly distributed (observed pattern consistently outside the CSR simulation envelope).</p></li>
 <li><p>Global Moran’s I on road-length-normalised accident rates is significant (I = 0.206, p &lt; 0.001) — accident rates are spatially autocorrelated across districts</p></li>
 <li><p>Local Moran’s I (LISA) identifies a <strong>small but statistically significant High-High cluster core</strong>, alongside a small Low-High outlier; most districts show no significant spatial association</p></li>
-<li><p><strong>Motorcyclists account for the majority</strong> of fatal accident victims</p></li>
-<li><p>Motorcyclist victims skew <strong>younger</strong> than car-driver victims</p></li>
-<li><p>Men outnumber women across nearly every road-user category (excluding pedestrians/cyclists, where sample size is small)</p></li>
-<li><p>The central hotspot from Q1 is <strong>driven primarily by motorcycle fatalities</strong></p></li>
-<li><p>Cross-K analysis shows car and motorcycle fatalities are <strong>spatially associated</strong> at larger distances — the two groups share overlapping high-risk zones rather than occurring in segregated areas</p></li>
-<li><p>No significant association between vehicle type and cause code once a single outlier pedestrian record is excluded</p></li>
+</ul>
+<p><strong>Question 2 : Vulnerable Road Users</strong></p>
+<ul>
+<li><p><strong>Motorcyclists account for the majority</strong> of fatal accident victims.</p></li>
+<li><p>Motorcyclist victims skew <strong>younger</strong> than car-driver victims.</p></li>
+<li><p>Men outnumber women across nearly every road-user category (excluding pedestrians/cyclists, where sample size is small).</p></li>
+<li><p>The central hotspot from Question 1 is <strong>driven primarily by motorcycle fatalities</strong>.</p></li>
+<li><p>Cross-K analysis shows car and motorcycle fatalities are <strong>spatially associated</strong> at larger distances — the two groups share overlapping high-risk zones rather than occurring in segregated areas.</p></li>
+<li><p>No significant association between vehicle type and cause code once a single outlier pedestrian record is excluded.</p></li>
 </ul>
 </section>
-<section id="key-findings-questions-3-4-hospital-and-bts-mrt-proximity" class="slide level2">
-<h2>Key Findings — Questions 3 &amp; 4: Hospital and BTS &amp; MRT Proximity</h2>
+<section id="key-findings-1" class="slide level2 smaller">
+<h2>Key Findings</h2>
+<p><strong>Question 3 : Hospital Proximity</strong></p>
 <ul>
-<li><p>56.6% of fatal accidents occurred within 2km of a hospital, versus only 17.1% of land area falling within that same distance band</p></li>
-<li><p>Areas beyond 5km from a hospital account for just 14.9% of accidents, despite covering 60% of land area</p></li>
-<li><p><strong>Hypothetical conclusion</strong>: this pattern likely reflects that both hospital placement and accident risk are driven by the same underlying factor — population density and traffic exposure — rather than any direct relationship between hospital proximity and fatality risk itself</p></li>
-<li><p>Most fatal accidents (486 of 530) occurred <strong>outside</strong> the 500m rapid transit buffer — but this reflects the buffer’s small geographic footprint (131 km²), not lower risk within it</p></li>
-<li><p>Once normalised by area, the accident rate is actually <strong>higher inside</strong> the transit buffer (0.336 per km²) than outside it (0.065 per km²)</p></li>
-<li><p><strong>Hypothetical conclusion</strong>: this again likely reflects population density and traffic exposure concentrated around transit nodes, rather than transit access itself increasing risk</p></li>
+<li><p>56.6% of fatal accidents occurred within 2km of a hospital, versus only 17.1% of land area falling within that same distance band.</p></li>
+<li><p>Areas beyond 5km from a hospital account for just 14.9% of accidents, despite covering 60% of land area.</p></li>
+<li><p><strong>Hypothetical conclusion</strong>: this pattern likely reflects that both hospital placement and accident risk are driven by the same underlying factors — population density and traffic exposure — rather than any direct relationship between hospital proximity and fatality risk itself.</p></li>
+</ul>
+<p><strong>Question 4 : BTS &amp; MRT Proximity</strong></p>
+<ul>
+<li><p>Most fatal accidents (486 of 530) occurred <strong>outside</strong> the 500m rapid transit buffer — but this reflects the buffer’s small geographic footprint, not lower risk within it.</p></li>
+<li><p>Once normalised by area, the accident rate is actually <strong>higher inside</strong> the transit buffer (0.319 per km²) than outside it (0.065 per km²).</p></li>
+<li><p><strong>Hypothetical conclusion</strong>: this again likely reflects population density and traffic exposure concentrated around transit nodes, rather than transit access itself increasing risk.</p></li>
 </ul>
 </section>
 <section id="visual-evidence" class="slide level2">
@@ -264,7 +271,7 @@ Cher In Teo
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="images/KDE.png" width="304"></p>
+<p><img data-src="images/KDE.png" style="width:120.0%"></p>
 </figure>
 </div>
 </div>
@@ -275,7 +282,7 @@ Cher In Teo
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="images/Lisa.png" width="490"></p>
+<p><img data-src="images/Lisa.png" style="width:120.0%"></p>
 </figure>
 </div>
 </div>
@@ -288,7 +295,7 @@ Cher In Teo
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="images/Hospital.png" width="508"></p>
+<p><img data-src="images/Hospital.png" style="width:120.0%"></p>
 </figure>
 </div>
 </div>
@@ -299,7 +306,7 @@ Cher In Teo
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="images/Transit.png" width="510"></p>
+<p><img data-src="images/Transit.png" style="width:120.0%"></p>
 </figure>
 </div>
 </div>
@@ -309,10 +316,10 @@ Cher In Teo
 <section id="data-quality" class="slide level2">
 <h2>Data Quality</h2>
 <ul>
-<li><p>Source data was in Thai language and translated using an AI tool, resulting in data integrity loss but mitigated with manual spot-checking for accuracy.</p></li>
-<li><p>Latitude/longitude columns in the raw file were found to be swapped and were corrected based on known coordinate ranges for Thailand.</p></li>
+<li><p>Source data was in Thai language and translated using an AI tool, resulting in some data integrity loss, which was mitigated with manual spot-checking for accuracy.</p></li>
+<li><p>Latitude/longitude columns in the original translated file were found to be swapped and were corrected based on known coordinate ranges for Thailand.</p></li>
 <li><p>16 duplicate records (with identical coordinates, death date, age, sex, cause code) were identified and removed as likely data entry errors.</p></li>
-<li><p>A significant number of records with missing coordinates were excluded (9516 of which 957 were for BMR out of a total 1487 BMRrecords), reflecting poor data quality.</p></li>
+<li><p>A significant number of records with missing coordinates were excluded (9516 nationally, of which 957 fell within the BMR, out of a total 1487 BMR records), reflecting poor data quality.</p></li>
 <li><p>Genuine distinct fatalities sharing the same exact coordinates were <strong>jittered</strong> so that each contributes separately to the Kernel Density Estimation (KDE) surface instead of merging into a single point or creating a false density spike at the specific coordinate.</p></li>
 </ul>
 </section>
@@ -320,12 +327,9 @@ Cher In Teo
 <h2>Conclusion</h2>
 <ul>
 <li><p><strong>Location-Specific Resource Allocation</strong>: Statistically significant High-High cluster districts identified should be prioritised for road safety infrastructure review and increased traffic police enforcement.</p></li>
-<li><p><strong>Motorcyclist-Focused Interventions</strong>: Targeted measures such as increased rider education, stringent license requirements or physical infrastructure improvements such as motorcycles-only dedicated lanes can be implemented in tandem for this user group.</p></li>
+<li><p><strong>Motorcyclist-Focused Interventions</strong>: Targeted measures such as increased rider education, stringent license requirements, or physical infrastructure improvements such as motorcycle-only dedicated lanes can be implemented in tandem for this user group.</p></li>
 <li><p><strong>Suggested Next Steps</strong>: Incorporating reliable population density and traffic exposure data will help strengthen policy-making decisions based on geospatial analysis for Bangkok and other provinces with higher rates of fatal road accidents. An attempt to use OSM population density data sourced from The Humanitarian Data Exchange proved futile, which limited the analytical depth and reach of this study.</p></li>
 </ul>
-</section>
-<section class="slide level2">
-
 
 
 </section>
