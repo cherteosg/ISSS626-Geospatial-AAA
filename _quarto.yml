@@ -39,7 +39,7 @@ website:
         - text: "In-class Exercise 7" 
           href: "In-class_Ex5/In-class_Ex7.html" 
         - text: "In-class Exercise 8" 
-          href: "In-class_Ex5/In-class_Ex8.html" 
+          href: "In-class_Ex8/In-class_Ex8.html" 
     - text: "Take Home Exercises"
       menu:    
         - text: "Take Home Exercise 1 Technical Report" 
