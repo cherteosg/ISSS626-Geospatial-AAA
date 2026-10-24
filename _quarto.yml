@@ -37,15 +37,17 @@ website:
         - text: "In-class Exercise 5" 
           href: "In-class_Ex5/In-class_Ex5.html"
         - text: "In-class Exercise 7" 
-          href: "In-class_Ex5/In-class_Ex7.html"        
+          href: "In-class_Ex5/In-class_Ex7.html" 
+        - text: "In-class Exercise 8" 
+          href: "In-class_Ex5/In-class_Ex8.html" 
     - text: "Take Home Exercises"
       menu:    
         - text: "Take Home Exercise 1 Technical Report" 
           href: "Take-Home_Ex1/Take-Home_Ex1.html"
         - text: "Take Home Exercise 1 Executive Report" 
           href: "Take-Home_Ex1/Take-Home_Ex1_ER.html"
-         
-         
+        - text: "Take Home Exercise 2 Technical Report" 
+          href: "Take-Home_Ex2/Take-Home_Ex2.html"
          
     right:
       - href: index.qmd
