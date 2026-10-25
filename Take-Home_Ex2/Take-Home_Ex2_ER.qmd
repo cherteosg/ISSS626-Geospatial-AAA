@@ -19,33 +19,31 @@ editor: visual
 ## From Burma to Myanmar {.smaller}
 
 ::: incremental
-
-- Burma gained independence from the United Kingdom in **1948**. Civil conflict existed right from its beginning and even its early parliamentary era was short-lived.  
+- Burma gained independence from the United Kingdom in **1948**. Civil conflict existed right from its beginning and even its early parliamentary era was short-lived.
 
 - The Karen National Union founded in 1947 began its armed struggle shortly after independence in **1948**.
 
-- The Communist Party of Burma fought  the government from **1948** to 1989, when it collapsed from internal strife. 
+- The Communist Party of Burma fought the government from **1948** to 1989, when it collapsed from internal strife.
 
 - Ne Win's Gentleman's Coup established a military-led Caretaker Government in Burma on October 28, **1958**, commencing decades of military rule.
 
 - The Kachin Independence Army was formed in **1961** to fight for Kachin ethnic autonomy.
 
-- The All Burma Students’ Democratic Front was founded in **1988** after the military crushed the nationwide pro-democracy uprising in September and forced thousands of students to flee its borders. 
+- The All Burma Students’ Democratic Front was founded in **1988** after the military crushed the nationwide pro-democracy uprising in September and forced thousands of students to flee its borders.
 
 - Burma became Myanmar on 18 June, **1988**.
 
 - It was declared the Republic of the Union of Myanmar in **2011** after which it was governed by a civilian government until 2021.
 
-- The 1 February, **2021** military coup was a massive catalyst that completely reshaped the country’s  decades-long civil war. 
+- The 1 February, **2021** military coup was a massive catalyst that completely reshaped the country’s decades-long civil war.
+
   - The Kachin Independence Army and the Karen National Union shifted from localized insurgencies into pivotal drivers of a nationwide, coordinated revolution to completely topple the military junta (the State Administration Council).
-  -  The escalation spread rapidly to almost every major ethnic minority region and the military junta began the use of unprecedented military force on its own people.
-
+  - The escalation spread rapidly to almost every major ethnic minority region and the military junta began the use of unprecedented military force on its own people.
 :::
-
 
 ## Overview {.smaller}
 
-Our geospatial analysis seeks to address the following questions: 
+Our geospatial analysis seeks to address the following questions:
 
 1.  **Where** are the hot spots, cold spots and spatial outliers of armed conflict?
 2.  **How fast and in what pattern** is violence changing over space and time?
@@ -53,7 +51,7 @@ Our geospatial analysis seeks to address the following questions:
 ::::: columns
 ::: {.column width="55%"}
 - **Study Period:** January 2021 (a month before the coup) to September 2025
-- **Aspatial Data:**  Armed Conflict Location & Event Data Project (ACLED) data of Myanmar
+- **Aspatial Data:** Armed Conflict Location & Event Data Project (ACLED) data of Myanmar
 - **Violent Events:** ACLED *battles*, *explosions / remote violence* and *violence against civilians* (total count: 54,004)
 - **Geospatial Data:**Myanmar Township Boundaries MIMU v9.4 (total townships: 330, total state/regions: 18 )
 :::
@@ -83,7 +81,7 @@ Our geospatial analysis seeks to address the following questions:
 
 ## Violence is widespread but clustered
 
-::: columns
+:::::: columns
 ::: {.column width="33%"}
 ![Violent events per township (raw counts)](images/violentinc.png){fig-align="center" height="580"}
 :::
@@ -95,8 +93,7 @@ Our geospatial analysis seeks to address the following questions:
 ::: {.column width="33%"}
 ![Local Moran's I: 47 High-High, 32 Low-Low](images/localmoran.png){fig-align="center" height="580"}
 :::
-:::
-
+::::::
 
 ## Violence escalated after the coup and peaked in late 2023
 
@@ -138,7 +135,7 @@ Sources: [ACLED Myanmar methodology](https://acleddata.com/methodology/acleds-me
 
 **Conflict hot spots.** During the study period (Jan 2021 – Sep 2025), Sagaing, Magway and Mandalay hold 42.6% of violent events and are the main centres of violence. They should be a priority for humanitarian aid, although continuing fighting makes access difficult and dangerous.
 
-**Hot spot trends.** Townships with rising Gi* trends are where violence is becoming relatively more intense. They are candidates for early warning, civilian protection, targeted aid and closer monitoring. The trends are retrospective, not predictive, and can change as new data arrive.
+**Hot spot trends.** Townships with rising Gi\* trends are where violence is becoming relatively more intense. They are candidates for early warning, civilian protection, targeted aid and closer monitoring. The trends are retrospective, not predictive, and can change as new data arrive.
 
 **Fragmented authority.** Control is split between the military, the resistance and ethnic armed groups. After the March 2025 earthquake, ceasefires were announced but airstrikes continued, and human rights groups reported that aid was delayed or blocked in some areas. Ethnic armed groups have long called for greater autonomy or a federal system, so a lasting peace process would need to address these demands rather than rely on a single government.
 
@@ -149,5 +146,5 @@ Sources: [ACLED Myanmar methodology](https://acleddata.com/methodology/acleds-me
 **Economic collapse.** The continued civil war has disrupted trade, farming and jobs, leading to a sharp rise in poverty. As state control collapsed, the illicit economy has grown and helps fund armed groups.
 
 ::: aside
-Sources: [Number of internally displaced people in Myanmar](https://reliefweb.int/report/myanmar/number-internally-displaced-people-myanmar-12-oct-2026); [The Growth and Power of Myanmar's Illicit Economy](https://theowp.org/reports/the-growth-and-power-of-myanmars-illicit-economy/); [Myanmar earthquake, March 2025 (ReliefWeb)](https://reliefweb.int/disaster/eq-2025-000043-mmr)
+Sources: [Number of internally displaced people in Myanmar](https://reliefweb.int/report/myanmar/number-internally-displaced-people-myanmar-12-oct-2026); [The Growth and Power of Myanmar's Illicit Economy](https://theowp.org/reports/the-growth-and-power-of-myanmars-illicit-economy/); [Myanmar earthquake](https://reliefweb.int/disaster/eq-2025-000043-mmr)
 :::
