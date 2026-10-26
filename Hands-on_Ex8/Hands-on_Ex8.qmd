@@ -115,7 +115,7 @@ tm_shape(stores) +
 tmap_mode("plot")
 ```
 
-### Importing aspatial data 
+### Importing aspatial data
 
 Next, read_csv() of readr package will be used to import the two aspatial data sets into R environment.
 
@@ -131,9 +131,9 @@ store_sales <- read_csv(
 summary(store_sales)
 ```
 
-## Data Preparation 
+## Data Preparation
 
-### Aggregating store sales 
+### Aggregating store sales
 
 Code chunk below is used to aggregate the store sales data at Store Code.
 
@@ -144,7 +144,7 @@ store_sales_aggre <- store_sales %>%
              "Total_Sales" = sum(Amount, na.rm = TRUE))
 ```
 
-### Relational join 
+### Relational join
 
 In the code chunk below, left_join() of dplyr package is used to append data from store_sales data.frame onto stores sf data.frame. At the same time a new field called Store_size has been created.
 
@@ -161,7 +161,7 @@ Next, summary() is used to check if the are any missing values in the data.frame
 summary(stores)
 ```
 
-### Tidying pop2019 data.frame 
+### Tidying pop2019 data.frame
 
 We are planning to append data in pop2019 data.frame onto village sf data.frame. Before we can do so, it is wise to check in to values in the join field are the same.
 
@@ -192,7 +192,7 @@ village <- village %>%
               VILLCODE == V_ID))
 ```
 
-### Check for missing or zero values 
+### Check for missing or zero values
 
 Code chunk below is used to check in any records with missing values.
 
@@ -225,7 +225,7 @@ any(is.na(village$M_CNT))
 any(is.na(village$F_CNT))
 ```
 
-## Computing Distance Matrix 
+## Computing Distance Matrix
 
 Instead of calculate the distance between the villages and stores, we will calculate the centroid of each village using the code chunk below. Then, compute the distance between the centroids of the villages and the stores.
 
@@ -251,7 +251,7 @@ distmat_long <- distmat %>%
   mutate(distance = as.numeric(distance))
 ```
 
-## Preparing Interaction Matrix 
+## Preparing Interaction Matrix
 
 Code chunk below will be used to build the interaction matrix required by MCI package.
 
@@ -269,7 +269,7 @@ interaction_matrix <- distmat_long %>%
 summary(interaction_matrix)
 ```
 
-## Computing Huff model 
+## Computing Huff model
 
 ```{r}
 huff_share <- huff.shares( 
@@ -277,7 +277,7 @@ huff_share <- huff.shares(
   "Store_size", "distance")
 ```
 
-### Trade area analysis for a single store 
+### Trade area analysis for a single store
 
 First, let us select market share data of a store by using Store_CD field (i.e. TG).
 
@@ -323,8 +323,7 @@ tm_shape(Trade_area) +
   tm_grid(alpha =0.2)
 ```
 
-
-### Store sales analysis 
+### Store sales analysis
 
 One of the usage of Huff model is to estimate the store sales by using village population.
 
