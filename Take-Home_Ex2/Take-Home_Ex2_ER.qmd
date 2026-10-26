@@ -19,7 +19,7 @@ editor: visual
 ## From Burma to Myanmar {.smaller}
 
 ::: incremental
-- Burma gained independence from the United Kingdom in **1948**. Civil conflict existed right from its beginning and even its early parliamentary era was short-lived.
+- Burma gained independence from the United Kingdom in **1948**. However, civil conflict existed right from its beginning and its early parliamentary era was relatively short-lived.
 
 - The Karen National Union founded in 1947 began its armed struggle shortly after independence in **1948**.
 
