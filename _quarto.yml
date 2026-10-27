@@ -52,9 +52,6 @@ website:
           href: "Take-Home_Ex1/Take-Home_Ex2.html"
         - text: "Take Home Exercise 2 Executive Report" 
           href: "Take-Home_Ex1/Take-Home_Ex2_ER.html"
-
-
-
     right:
       - href: index.qmd
         text: Home
