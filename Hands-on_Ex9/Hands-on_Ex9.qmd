@@ -22,6 +22,7 @@ The geography of accessibility measures how easily people can overcome distance 
 Questions that can be answered by accessibility models are:
 
 - Which part of the geographical areas are deprived from getting access to a social service, facility or job opportunity?
+
 - Which part of the geographical areas will be affected by a public policy or business decision such as merging JCs, secondary and primary schools.
 
 In this hands-on exercise, we will model geographical accessibility by using R’s geospatial analysis packages.
@@ -83,11 +84,11 @@ pacman::p_load(tmap, SpatialAcc, sf,
 
 Note: Installing tidyverse will install readr, dplyr and ggplots packages as well as other R packages such as tidyr, stringr, forcats, tibble, purrr and magrittr.
 
-## Geospatial Data Wrangling 
+## Geospatial Data Wrangling
 
 ### Import Geospatial Data
-Data 
-Three geospatial sets data will be imported from the data/geospatial sub-folder using *st_read()* of sf packages.
+
+Data Three geospatial sets data will be imported from the data/geospatial sub-folder using *st_read()* of sf packages.
 
 ```{r}
 mpsz <- st_read(dsn = "data/geospatial", 
@@ -120,7 +121,6 @@ Verify the projection by using *st_crs()* of sf package.
 st_crs(mpsz)
 ```
 
-
 ### Data Cleaning & Update
 
 Exclude redundant fields in the data tables of both eldercare and hexagons and create new fields (demand and capacity) using *mutate()* of dplyr package.
@@ -135,7 +135,7 @@ hexagons <- hexagons %>%
 
 Note that for the purpose of this hands-on exercise, a constant value of 100 is used. In practice, actual demand of the hexagon and capacity of the eldercare centers should be used.
 
-## Aspatial Data Handling and Wrangling 
+## Aspatial Data Handling and Wrangling
 
 ### Import Aspatial Data
 
@@ -146,11 +146,11 @@ ODMatrix <- read_csv("data/aspatial/OD_Matrix.csv",
                      skip = 0)
 ```
 
-### Tidy Distance Matrix 
+### Tidy Distance Matrix
 
-The imported OD Matrix is organised in a long format ('thin') where each row represents a trip from origin to destination. 
+The imported OD Matrix is organised in a long format ('thin') where each row represents a trip from origin to destination.
 
-However, modelling packages in R require a wide format ('fat') where rows are origins and columns are destinations. 
+However, modelling packages in R require a wide format ('fat') where rows are origins and columns are destinations.
 
 *spread()* of tidyr package is used to transform the OD Matrix from a thin format into a fat format.
 
@@ -170,12 +170,11 @@ Currently, the distance is measured in meters because the SVY21 projected coordi
 distmat_km <- as.matrix(distmat/1000)
 ```
 
-## Modelling and Visualising Accessibility using Hansen Method 
+## Modelling and Visualising Accessibility using Hansen Method
 
-### Hansen’s Accessibility 
+### Hansen’s Accessibility
 
-Compute Hansen’s accessibility by using *ac()* of SpatialAcc package.
-*data.frame()* is used to save the output in a data frame called acc_Hansen.
+Compute Hansen’s accessibility by using *ac()* of SpatialAcc package. *data.frame()* is used to save the output in a data frame called acc_Hansen.
 
 ```{r}
 acc_Hansen <- data.frame(ac(hexagons$demand,
@@ -198,7 +197,7 @@ Convert the data table into tibble format.
 acc_Hansen <- as_tibble(acc_Hansen)
 ```
 
-Use *bind_cols()* of dplyr to join the acc_Hansen tibble data frame with the hexagons simple feature data frame. 
+Use *bind_cols()* of dplyr to join the acc_Hansen tibble data frame with the hexagons simple feature data frame.
 
 ```{r}
 hexagon_Hansen <- bind_cols(hexagons, acc_Hansen)
@@ -208,9 +207,9 @@ Notice that hexagon_Hansen is a simple feature data frame and not a typical tibb
 
 The above can be combined into a single code chunk if preferred.
 
-### Visualising Hansen’s Accessibility 
+### Visualising Hansen’s Accessibility
 
-#### Extracting Map Extend 
+#### Extracting Map Extend
 
 Extract the extend of hexagons simple feature data frame by using *st_bbox()* of sf package.
 
@@ -239,7 +238,7 @@ tm_shape(eldercare) +
   tm_grid(alpha = 0.2)
 ```
 
-### Statistical Graphic Visualisation 
+### Statistical Graphic Visualisation
 
 Compare the distribution of Hansen’s accessibility values by URA Planning Region.
 
@@ -252,18 +251,9 @@ hexagon_Hansen <- st_join(hexagon_Hansen, mpsz,
 
 *ggplot()* will be used to plot the distribution by using boxplot graphical method.
 
-```{r{}
-ggplot(data=hexagon_Hansen, 
-       aes(y = log(accHansen), 
-           x= REGION_N)) + 
-  geom_boxplot() + 
-  geom_point(stat="summary", 
-             fun.y="mean", c
-             olour ="red", 
-             size=2)
-```
+`{r{} ggplot(data=hexagon_Hansen,         aes(y = log(accHansen),             x= REGION_N)) +    geom_boxplot() +    geom_point(stat="summary",               fun.y="mean", c              olour ="red",               size=2)`
 
-## Modelling and Visualising Accessibility using KD2SFCA Method 
+## Modelling and Visualising Accessibility using KD2SFCA Method
 
 ### Compute KD2SFCA’s Accessibility
 
@@ -282,7 +272,7 @@ acc_KD2SFCA <- as_tibble(acc_KD2SFCA)
 hexagon_KD2SFCA <- bind_cols(hexagons, acc_KD2SFCA)
 ```
 
-### Visualising KD2SFCA’s accessibility 
+### Visualising KD2SFCA’s accessibility
 
 Create a high cartographic quality accessibility to eldercare centres in Singapore using a collection of mapping functions of tmap package. Notice that mapex is reused for bbox argument.
 
@@ -304,7 +294,7 @@ tm_shape(hexagon_KD2SFCA,
   tm_grid(alpha = 0.2)
 ```
 
-### Statistical Graphic Visualisation 
+### Statistical Graphic Visualisation
 
 Compare the distribution of KD2CFA accessibility values by URA Planning Region.
 
@@ -328,9 +318,9 @@ ggplot(data=hexagon_KD2SFCA,
              size=2)
 ```
 
-## Modelling and Visualising Accessibility using Spatial Accessibility Measure (SAM) Method 
+## Modelling and Visualising Accessibility using Spatial Accessibility Measure (SAM) Method
 
-### Computing SAM Accessibility 
+### Computing SAM Accessibility
 
 Calculate SAM accessibility using ac() from the SpatialAcc package, and save the output in a data frame called acc_SAM with data.frame(). Note that "SAM" is used for the family argument.
 
@@ -347,7 +337,7 @@ acc_SAM <- as_tibble(acc_SAM)
 hexagon_SAM <- bind_cols(hexagons, acc_SAM)
 ```
 
-### Visualising SAM’s Accessibility 
+### Visualising SAM’s Accessibility
 
 Create a high cartographic quality accessibility to eldercare centres in Singapore using a collection of mapping functions of tmap package. Notice that mapex is reused for bbox argument.
 
@@ -370,7 +360,7 @@ tm_shape(hexagon_SAM,
   tm_grid(alpha = 0.2)
 ```
 
-### Statistical Graphic Visualisation 
+### Statistical Graphic Visualisation
 
 Compare the distribution of SAM accessibility values by URA Planning Region.
 
