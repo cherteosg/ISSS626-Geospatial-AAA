@@ -135,7 +135,7 @@ hexagons <- hexagons %>%
 
 Note that for the purpose of this hands-on exercise, a constant value of 100 is used. In practice, actual demand of the hexagon and capacity of the eldercare centers should be used.
 
-## Aspaital Data Handling and Wrangling 
+## Aspatial Data Handling and Wrangling 
 
 ### Import Aspatial Data
 
